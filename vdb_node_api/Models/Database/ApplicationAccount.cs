@@ -24,26 +24,16 @@ namespace vdb_node_api.Models.Database
 	 */
 	public class ApplicationAccount
 	{
-		public long Id { get; set; }
-		public string? Name { get; set; }
-		public string ApiKeyHash { get; set; } // used as password, could use byte[], but it creates migration problems
-
-		public DateTime CreatedDateTimeUtc { get; set; } = DateTime.UtcNow;
-		public DateTime LastAccessDateTimeUtc { get; set; } = DateTime.UtcNow;
-
-		public DateTime AccessNotBeforeUtc { get; set; } = DateTime.UtcNow;
-		public DateTime AccessNotAfterUtc { get; set; } = DateTime.UtcNow.AddDays(1);
-		public bool CanAccessNow => DateTime.UtcNow > AccessNotBeforeUtc && DateTime.UtcNow < AccessNotAfterUtc;
-
-		public DateTime RefreshNotBeforeUtc { get; set; } = DateTime.UtcNow.AddMinutes(60);
-		public DateTime RefreshNotAfterUtc { get; set; } = DateTime.UtcNow.AddDays(7);
-		public bool CanRefreshNow => DateTime.UtcNow > RefreshNotBeforeUtc && DateTime.UtcNow < RefreshNotAfterUtc;
-
-		public bool IsPendingDeletion => !(CanAccessNow || CanRefreshNow);
+		public int Id { get; set; }
+		public string ApiKeyHash { get; set; } // byte[] creates migration problems
+		public string[] RefreshJwtKeysHashes { get; set; }
+		public DateTime LastAccessedUtc { get; set; }
+	
 
 		public ApplicationAccount(string apiKeyHash)
 		{
 			this.ApiKeyHash = apiKeyHash;
+			this.LastAccessedUtc = DateTime.UtcNow;
 		}
 	}
 }

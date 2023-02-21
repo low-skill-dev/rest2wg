@@ -5,11 +5,13 @@
 {
 	public class LoginResponse
 	{
-		public string AccessJwt { get; set; }
+		public string AccessToken { get; set; }
+		public string RefreshToken { get; set; }
 
-		public LoginResponse(string accessJwt)
+		public LoginResponse(string accessToken, string refreshToken)
 		{
-			this.AccessJwt = accessJwt;
+			this.AccessToken = accessToken;
+			this.RefreshToken = refreshToken;
 		}
 	}
 }

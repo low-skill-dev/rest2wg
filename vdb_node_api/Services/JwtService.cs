@@ -9,6 +9,8 @@ using System.Text;
 using vdb_node_api.Models.Database;
 using System.Runtime;
 using System.Security.Principal;
+using System.Security.Cryptography;
+using IdentityModel;
 
 namespace vdb_node_api.Services
 {
@@ -16,13 +18,13 @@ namespace vdb_node_api.Services
 	/* Singleton-сервис, заниющйся генерацией Jwt по набору утверждений
 	 * с дальнейшей генерацией HMAC SHA512 подписи токена.
 	 */
-	public class JwtService
+	public sealed class JwtService
 	{
-		protected readonly SettingsProviderService _settingsProvider;
-		protected virtual JwtServiceSettings _settings => _settingsProvider.JwtServiceSettings;
+		private readonly SettingsProviderService _settingsProvider;
 		private readonly JwtSecurityTokenHandler _tokenHandler;
 		private readonly SymmetricSecurityKey _symmetricKey;
 		private readonly SigningCredentials _signingCredentials;
+		private JwtServiceSettings _settings => _settingsProvider.JwtServiceSettings;
 
 		public JwtService(SettingsProviderService settingsProvider)
 		{
@@ -33,20 +35,32 @@ namespace vdb_node_api.Services
 			this._signingCredentials = new SigningCredentials(this._symmetricKey, SecurityAlgorithms.HmacSha512Signature);
 		}
 
-		/* Данный метод является конкретной реализацией для данного приложения, 
-		 * в то время как остальные были скопированы. 
-		 */
-		public string GenerateJwtToken(ApplicationAccount account)
-			=> GenerateJwtToken(new Claim[] {
+
+
+		public string GenerateAccessToken(ApplicationAccount account)
+		{
+			return GenerateJwtToken(new Claim[] {
 				new Claim(nameof(account.Id), account.Id.ToString()),
-				new Claim(nameof(account.ApiKeyHash), account.ApiKeyHash ?? string.Empty),
-				new Claim(nameof(account.CreatedDateTimeUtc),account.CreatedDateTimeUtc.Ticks.ToString()),
-				new Claim(nameof(account.LastAccessDateTimeUtc),account.LastAccessDateTimeUtc.Ticks.ToString()),
-				new Claim(nameof(account.AccessNotBeforeUtc),account.AccessNotBeforeUtc.Ticks.ToString()),
-				new Claim(nameof(account.AccessNotAfterUtc),account.AccessNotAfterUtc.Ticks.ToString()),
-				new Claim(nameof(account.RefreshNotBeforeUtc),account.RefreshNotBeforeUtc.Ticks.ToString()),
-				new Claim(nameof(account.RefreshNotAfterUtc),account.RefreshNotAfterUtc.Ticks.ToString())
-			});
+				new Claim(nameof(account.LastAccessedUtc),account.LastAccessedUtc.Ticks.ToString())
+			}, DateTime.UtcNow.AddDays(_settings.AccessLifespanDays));
+		}
+
+		public const string RefreshKeyFieldName = "refreshkey";
+		public const string RefreshTokenCookieName = "X-Refresh-Token";
+		public string GenerateRefreshToken(ApplicationAccount account, 
+			out string refreshKey, out string refreshKeyHash)
+		{
+			var key = RandomNumberGenerator.GetBytes(64);
+			refreshKey = Base64Url.Encode(key);
+			refreshKeyHash = Base64Url.Encode(SHA512.HashData(key));
+
+			return GenerateJwtToken(new Claim[]
+			{
+				new Claim(nameof(account.Id), account.Id.ToString()),
+				new Claim(nameof(account.LastAccessedUtc),account.LastAccessedUtc.Ticks.ToString()),
+				new Claim(RefreshKeyFieldName,refreshKey)
+			}, DateTime.UtcNow.AddDays(_settings.RefreshLifespanDays));
+		}
 
 		public string GenerateJwtToken(IList<Claim> claims, DateTime? expires = null)
 		{
@@ -59,7 +73,7 @@ namespace vdb_node_api.Services
 			}));
 		}
 
-		[Obsolete(@"Use built-in 'Authorize' attr.")] // we are using built-in 'Authorize' attr.
+		//[Obsolete(@"Use built-in 'Authorize' attr.")]
 		public ClaimsPrincipal ValidateJwtToken(string token)
 		{
 			var result = _tokenHandler.ValidateToken(token, new TokenValidationParameters

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using vdb_node_api.Infrastructure.Database;
 using vdb_node_api.Models.Api.Application;
@@ -58,6 +59,7 @@ namespace vdb_node_api.Controllers
 			return await _context.ApplicationAccounts.FirstOrDefaultAsync(x => x.ApiKeyHash.Equals(keyHash));
 		}
 
+		#region ValidateApplicationJwt 
 		/* Метод служит для валидации JWT токена пользователя API.
 		 * Данный метод не выполняет реальной работы, а лишь подтверждает, 
 		 * что мидлваре, отвечающее за авторизацию, пропустило запрос.
@@ -71,6 +73,7 @@ namespace vdb_node_api.Controllers
 			// I hate warnings, I hate warnings, I hate warnings... I HATE THIS GREEN LINES I HATE WARNINGS !!!!!!!
 			return await Task.FromResult(Ok());
 		}
+		#endregion
 
 		/* Метод служит для получения JWT токена пользователя API.
 		 */
@@ -79,62 +82,101 @@ namespace vdb_node_api.Controllers
 		public async Task<IActionResult> LoginApplication([Required][FromBody] LoginRequest request)
 		{
 			var found = await findAppByKey(request.ApiKey);
-			if (found is null || !found.CanAccessNow)
+			if (found is null)
 			{
 				return Unauthorized();
 			}
 
-			var generatedJwt = _jwtService.GenerateJwtToken(found);
+			var generatedJwt = _jwtService.GenerateAccessToken(found);
 			return Ok(new LoginResponse(generatedJwt));
 		}
 
-		/* Метод служит для обновления API-ключа приложения на основании действительного.
-		 * Данная реализация служит заделом под механику refresh-ключей. Добавление в БД
-		 * одного поля NotAfter может запретить работу ключа, но разрешить её в данном методе.
+		/* Метод предназначен для http-only безопасного обновления.
 		 */
-		[HttpPatch, AllowAnonymous]
-		[Route("renew-key")]
-		public async Task<IActionResult> RenewApplicationKey([Required][FromBody] LoginRequest request)
+		[HttpPost, AllowAnonymous]
+		[Route("refresh")]
+		public async Task<IActionResult> RefreshJwtToken()
 		{
-			var found = await findAppByKey(request.ApiKey);
-			if (found is null || !found.CanRefreshNow)
+			if (!Request.Cookies.ContainsKey(JwtService.RefreshTokenCookieName))
 			{
-				return Unauthorized();
+				return BadRequest("Refresh token cookie was not present.");
 			}
 
-			var newKey = _accountService.RefreshAccountEntityKey(_context.Entry(found));
-			await _context.SaveChangesAsync();
-
-			_logger.LogInformation($"Application key was updated: " +
-				$"\'{request.ApiKey}\' (original key) -> " +
-				$"\'{newKey.Substring(newKey.Length / 32)}...\'");
-			return Ok(new RenewApiKeyResponse(newKey));			
+			return await RefreshJwtToken(new(Request.Cookies[JwtService.RefreshTokenCookieName] ?? string.Empty));
 		}
-
-		[HttpPut, AllowAnonymous]
-		[Route("by-master/generate")]
-		public async Task<IActionResult> GenerateNewAccount([Required][FromBody] AppRegistrationRequest request)
+		
+		[HttpPost, AllowAnonymous]
+		[Route("refresh-frombody")]
+		public async Task<IActionResult> RefreshJwtToken([FromBody][Required] RefreshJwtFrombodyRequest request)
 		{
-			if (!_mastersService.IsValid(request.MasterKey))
+			var refreshJwt = request.RefreshJwt;
+			if (string.IsNullOrEmpty(refreshJwt))
 			{
-				return Unauthorized();
+				return BadRequest("Refresh token was not present.");
 			}
 
-			var result = await _accountService.CreateNewAccount(request.NewAppName);
-			return Ok(new AppRegistrationResponse(result.Item1));
-		}
-
-		[HttpGet, AllowAnonymous]
-		[Route("by-master/get-info")]
-		public async Task<IActionResult> GenerateNewAccount([Required][FromBody] AppRegistrationRequest request)
-		{
-			if (!_mastersService.IsValid(request.MasterKey))
+			ClaimsPrincipal? parsedJwt;
+			try
 			{
-				return Unauthorized();
+				parsedJwt = _jwtService.ValidateJwtToken(refreshJwt);
+			}
+			catch
+			{
+				return BadRequest("Refresh token was corrupted.");
 			}
 
-			var result = await _accountService.CreateNewAccount(request.NewAppName);
-			return Ok(new AppRegistrationResponse(result.Item1));
+			var idClaim = parsedJwt.FindFirstValue(nameof(ApplicationAccount.Id));
+			var keyClaim = parsedJwt.FindFirstValue(JwtService.RefreshKeyFieldName);
+			if (idClaim is null || keyClaim is null)
+			{
+				return BadRequest("Refresh token does not contain all of required fields.");
+			}
+
+			if (!long.TryParse(idClaim, out var accoutId))
+			{
+				return BadRequest("Refresh token fields was corrupted.");
+			}
+
+			var account = await _context.ApplicationAccounts.FirstOrDefaultAsync(x => x.Id == accoutId);
+			if (account is null)
+			{
+				return BadRequest("Refreshed account was not found on the server.");
+			}
+
+			string keyHash;
+			try
+			{
+				keyHash = Base64Url.Encode(SHA512.HashData(Base64Url.Decode(keyClaim)));
+			}
+			catch
+			{
+				return BadRequest("Refresh key was in a wrong format");
+			}
+
+			var keyId = account.RefreshJwtKeysHashes.ToList().FindIndex(k => k.Equals(keyHash));
+			if (keyId < 0)
+			{
+				return BadRequest("Refresh key was not valid for this account.");
+			}
+
+			// all checks completed here
+
+			var newAccess = _jwtService.GenerateAccessToken(account);
+			var newRefresh = _jwtService.GenerateRefreshToken(account, out var newKey, out var newHash);
+
+			account.RefreshJwtKeysHashes[keyId] = newHash;
+			try
+			{
+				await _context.SaveChangesAsync();
+			}
+			catch
+			{
+				return StatusCode(StatusCodes.Status500InternalServerError);
+			}
+
+
+			return Ok(new LoginResponse(newAccess, newRefresh));
 		}
+
 	}
 }
