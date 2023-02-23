@@ -3,7 +3,7 @@ using vdb_node_api.Models;
 
 namespace vdb_node_api.Services
 {
-	/* Singleton-сервис для валидации мастер-аккаунтов.
+	/* Данный Singleton-сервис служит для валидации мастер-аккаунтов.
 	 */
 	public sealed class MasterAccountsService
 	{
