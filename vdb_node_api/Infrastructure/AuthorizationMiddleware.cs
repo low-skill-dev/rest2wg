@@ -30,8 +30,8 @@ namespace vdb_node_api.Infrastructure
 			{
 				/* according to RFC, the header may have single value only
 				 * Authorization  = "Authorization" ":" credentials
-                 * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
-                 */
+				 * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+				 */
 				key = header.Single();
 			}
 			catch (InvalidOperationException) // key is not single

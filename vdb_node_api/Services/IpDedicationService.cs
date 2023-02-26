@@ -52,6 +52,7 @@ namespace vdb_node_api.Services
 	 * Unit testing private methods in C#
 	 * https://stackoverflow.com/a/15607491
 	 */
+
 	public sealed class IpDedicationService
 	{
 		// Константы никак не влияют на производительность
@@ -59,11 +60,11 @@ namespace vdb_node_api.Services
 		private const int MaxClients = 255 * 255;
 
 		private const byte FirstByteStart = 10;
-		private const byte SecondByteStart = 6;
+		private const byte SecondByteStart = 1;
 		private const byte ThirdByteStart = 1;
 		private const byte FourthByteStart = 1;
 
-		private const byte FirstByteCanTake = 256 - FirstByteStart;
+		private  const byte FirstByteCanTake = 256 - FirstByteStart;
 		private const byte SecondByteCanTake = 256 - SecondByteStart;
 		private const byte ThirdByteCanTake = 256 - ThirdByteStart;
 		private const byte FourthByteCanTake = 256 - FourthByteStart;
@@ -159,7 +160,7 @@ namespace vdb_node_api.Services
 		}
 
 		/// <returns>true if the pubKey was successfully found and removed, false otherwise.</returns>
-		public bool RemovePeer(string pubKey)
+		private bool RemovePeer(string pubKey)
 		{
 			if (!_dedicatedAddresses.TryGetValue(pubKey, out var address))
 			{
