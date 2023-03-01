@@ -6,11 +6,11 @@ using vdb_node_api.Models;
 namespace vdb_node_api.Infrastructure
 {
 
-	public sealed class AuthorizationMiddleware : IMiddleware
+	public sealed class ApiAuthorizationMiddleware : IMiddleware
 	{
 		private readonly MasterAccountsService _accountsService;
 		private readonly ILogger _logger;
-		public AuthorizationMiddleware(MasterAccountsService accountsService, ILogger<AuthorizationMiddleware> logger)
+		public ApiAuthorizationMiddleware(MasterAccountsService accountsService, ILogger<ApiAuthorizationMiddleware> logger)
 		{
 			_accountsService = accountsService;
 			_logger = logger;
@@ -39,7 +39,8 @@ namespace vdb_node_api.Infrastructure
 				_logger.LogWarning(
 					GetRejectionMessage(context, "Authorization header appeared more than once."));
 
-				return Task.FromResult(new StatusCodeResult(StatusCodes.Status400BadRequest));
+				context.Response.StatusCode = StatusCodes.Status400BadRequest;
+				return Task.CompletedTask;
 			}
 
 			if (string.IsNullOrEmpty(key)) // key is not present
@@ -47,17 +48,20 @@ namespace vdb_node_api.Infrastructure
 				_logger.LogWarning(
 					GetRejectionMessage(context, "Authorization key was null or empty."));
 
-				return Task.FromResult(new StatusCodeResult(StatusCodes.Status400BadRequest));
+				context.Response.StatusCode = StatusCodes.Status400BadRequest;
+				return Task.CompletedTask;
 			}
 
 			try
 			{
+				key = key.Split(' ').Last();
 				if (!_accountsService.IsValid(key)) // key format is valid, but not found
 				{
 					_logger.LogWarning(
 						GetRejectionMessage(context, "Authorization key was not found on the server."));
 
-					return Task.FromResult(new StatusCodeResult(StatusCodes.Status401Unauthorized));
+					context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+					return Task.CompletedTask;
 				}
 			}
 			catch // key format is invalid
@@ -65,7 +69,8 @@ namespace vdb_node_api.Infrastructure
 				_logger.LogWarning(
 						GetRejectionMessage(context, "Authorization key format was not valid."));
 
-				return Task.FromResult(new StatusCodeResult(StatusCodes.Status400BadRequest));
+				context.Response.StatusCode = StatusCodes.Status400BadRequest;
+				return Task.CompletedTask;
 			}
 
 			// key was successfully validated

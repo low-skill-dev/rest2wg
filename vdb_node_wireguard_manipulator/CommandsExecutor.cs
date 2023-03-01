@@ -53,14 +53,14 @@ namespace vdb_node_wireguard_manipulator
 			return await RunCommandWithBash(command);
 		}
 
-		public async Task AddPeer(string pubKey, string allowedIps)
+		public async Task<string> AddPeer(string pubKey, string allowedIps)
 		{
-			await ExecuteArbitraryCommand(GetAddPeerCommand(pubKey, allowedIps));
+			return await ExecuteArbitraryCommand(GetAddPeerCommand(pubKey, allowedIps));
 		}
 
-		public async Task RemovePeer(string pubKey)
+		public async Task<string> RemovePeer(string pubKey)
 		{
-			await ExecuteArbitraryCommand(GetRemovePeerCommand(pubKey));
+			return await ExecuteArbitraryCommand(GetRemovePeerCommand(pubKey));
 		}
 	}
 }

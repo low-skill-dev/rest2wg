@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using vdb_node_api.Infrastructure;
+using vdb_node_api.Services;
 
 namespace vdb_node_api;
 
@@ -20,6 +23,17 @@ class Program
 
 		builder.Services.AddControllers();
 
+		if (builder.Environment.IsDevelopment())
+		{
+			builder.Services.AddSwaggerGen();
+		}
+
+		builder.Services.AddSingleton<SettingsProviderService>();
+		builder.Services.AddSingleton<MasterAccountsService>();
+		builder.Services.AddSingleton<IpDedicationService>();
+
+	    builder.Services.AddTransient<ApiAuthorizationMiddleware>();
+
 		WebApplication app = builder.Build();
 
 		if (app.Environment.IsDevelopment())
@@ -36,7 +50,7 @@ class Program
 		});
 
 
-		app.UseMiddleware<AuthorizationMiddleware>();
+		app.UseMiddleware<ApiAuthorizationMiddleware>();
 		app.UseRouting();
 		app.MapControllers();
 
