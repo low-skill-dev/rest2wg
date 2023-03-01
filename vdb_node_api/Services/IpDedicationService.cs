@@ -2,41 +2,39 @@
 
 namespace vdb_node_api.Services
 {
-	/* Данный Singleton-сервис служит для
-	 * нумерации IP-адресов клиентов.
-	 * Кажому серверу предлагается выделить до 65к клиентов,
-	 * путем нумерации следующего рода
-	 * 10.6.1.1		->	+1      -> 10.6.1.2
-	 * 10.6.1.2		->	+253    -> 10.6.1.255
-	 * 10.6.1.255	->	+1      -> 10.6.2.1	
-	 * 10.6.2.1		->	+64770	-> 10.6.255.255
-	 * Таким образом, суммарный объем составляет >255*255 = >65к адресов,
-	 * нумеруемых в пространстве 10.6.1.1/32 -> 10.6.255.255/32.
-	 * 
-	 * Дополнительно закладывается алгоритмическая возможность нумерации
-	 * пространства по второму байту, следующим образом
-	 * 10.6.255.255	->	+1		-> 10.7.1.1
-	 * Таким образом, обспечивается возможность нумерации 
-	 * 255*255*(255-6) = 16191225 адресов.
+	/* Данный Singleton-сервис служит для нумерации IP-адресов клиентов.
+	 * Кажому серверу предлагается адресовать до 16777216 клиентов,
+	 * путем итерации по трём байтам следующего рода
+	 * 10.6.0.0		->	+1			-> 10.6.0.1
+	 * 10.6.0.1		->	+255		-> 10.6.1.0
+	 * 10.6.1.0		->	+7933050	-> 10.128.255.255
+	 * Согласно RFC 1918 (https://datatracker.ietf.org/doc/html/rfc1918#section-3),
+	 * существуют и другие пространства приватных адресов, однако 
+	 * 10.6.0.0 -> 10.128.255.255 является общепринятым и достаточным.
 	 * 
 	 * Данный сервис должен заниматься хранением публичного ключа и
 	 * адреса, выделенного для него. Хранение осуществляется в формате
-	 * (string pubKeyBase64, byte[] dedicatedAddress).
+	 * словаря <string pubKeyBase64, int dedicatedAddress>, где 
+	 * int dedicatedAddress служит для хранения IP-адреса в виде 4 байтов.
+	 * 
+	 * Максимальное количество клиентов предлагается ограничить 
+	 * пространством 10.10.255.255, а равно 10*255*255 = 650к клиентов.
+	 * 
 	 * Длинна ключа клиента WG составляет 256 бит, а равно 32 байта.
 	 * Длинна IP-адреса состаавляет 4 байта. Маска - константа, /32.
 	 * Поскольку Base64 представляет строку длинной равной 4/3 символов
 	 * от количества байт в изначальной последовательности, то для
-	 * хранения в таком виде потребуется 4/3*32*65025/1024/1024 Мб
-	 * памяти, что составляет менее 3 мб и является приемлемым.
-	 * Для хранения адресов потребуется 4*4*65025/1024/1024 Мб
-	 * памяти, что составляет менее 1 мб и является приемлимым.
+	 * хранения в таком виде потребуется 4/3*32*650*1000/1024/1024 Мб
+	 * памяти, что составляет менее 27 мб и является приемлемым.
+	 * Для хранения адресов потребуется 4*4*650*1000/1024/1024 Мб
+	 * памяти, что составляет менее 10 мб и является приемлимым.
 	 * 
 	 * Одним из вариантов является не хранение адресов, а их формирование
 	 * на основании индекса в массиве хранимых публичных ключей.
 	 * Заметим, что List<T> в С# представляет инкапуляцию Array<T>
 	 * и имеет скорость случайного доступа равную О(1). Однако 
 	 * такой вариант плох проверкой ключа на существование, ибо
-	 * 65к - большое число элементов. В данном случае предлагается
+	 * 650к - большое число элементов. В данном случае предлагается
 	 * использовать словарь.
 	 * 
 	 * Словарь элементов представляет собой публичный ключ и адрес,
@@ -55,27 +53,16 @@ namespace vdb_node_api.Services
 
 	public sealed class IpDedicationService
 	{
-		// Константы никак не влияют на производительность
+		private void Swap<T>(ref T v1, ref T v2) { var t = v1; v1 = v2; v2 = t; }
+
+		private const byte FirstIpByteStart = 10;
+		private const byte SecondIpByteStart = 6;
+
+		private const int MaxClients = 10 * 255 * 255; // can be safely increased up to (128-6)*255*255
 		private const int NetworkMask = 32;
-		private const int MaxClients = 255 * 255;
 
-		private const byte FirstByteStart = 10;
-		private const byte SecondByteStart = 1;
-		private const byte ThirdByteStart = 1;
-		private const byte FourthByteStart = 1;
-
-		private  const byte FirstByteCanTake = 256 - FirstByteStart;
-		private const byte SecondByteCanTake = 256 - SecondByteStart;
-		private const byte ThirdByteCanTake = 256 - ThirdByteStart;
-		private const byte FourthByteCanTake = 256 - FourthByteStart;
-
-		private const int LastByteCanTake = FourthByteCanTake;
-		private const int LastTwoBytesCanTake = FourthByteCanTake * ThirdByteCanTake;
-		private const int LastThreeBytesCanTake = LastTwoBytesCanTake * SecondByteCanTake;
-
-
-		private Dictionary<string, byte[]> _dedicatedAddresses { get; set; }
-		private HashSet<byte[]> _usedAddresses { get; set; }
+		private Dictionary<string, int> _dedicatedAddresses { get; set; }
+		private HashSet<int> _usedAddresses { get; set; }
 
 		public IpDedicationService()
 		{
@@ -83,41 +70,49 @@ namespace vdb_node_api.Services
 			_usedAddresses = new();
 		}
 
-		private string BytesToAddress(byte[] address)
-		{
-			if (address.Length != 4)
-			{
-				throw new ArgumentException("IP adress must contain 4 bytes.");
-			}
-
-			// concat methods performance compared https://imgur.com/a/5dGE8xE
-			return $"{address[0]}.{address[1]}.{address[2]}.{address[3]}/{NetworkMask}";
-		}
-		private byte[] AddressToBytes(string address)
+		private int StringToIndex(string address) // tested
 		{
 			var slashIndex = address.LastIndexOf('/');
 			var actualAddress = slashIndex == -1 ?
 				address : address.Substring(0, slashIndex);
 
-			return actualAddress.Split('.').Select(byte.Parse).ToArray();
+			return BytesToIndex(actualAddress.Split('.').Select(byte.Parse).ToArray());
+		}
+		private int BytesToIndex(byte[] bytes) // tested
+		{
+			bytes[0] -= FirstIpByteStart;
+			bytes[1]-= SecondIpByteStart;
+			Swap(ref bytes[3], ref bytes[0]);
+			Swap(ref bytes[2], ref bytes[1]);
+			return BitConverter.ToInt32(bytes);
 		}
 
-		// be shure not to exceed the limit!
-		private byte[] IndexToAddress(int index)
+		private byte[] IndexToBytes(int index) // tested
 		{
-			byte second = (byte)(SecondByteStart + index / LastTwoBytesCanTake);
-			byte third = (byte)(ThirdByteStart + (index% LastTwoBytesCanTake)/LastByteCanTake);
-			byte fourth = (byte)(FourthByteStart + (index%LastTwoBytesCanTake%LastByteCanTake));
+			var address = BitConverter.GetBytes(index);
+			address[3] += FirstIpByteStart; // BitConverter return bytes right to left!
+			address[2] += SecondIpByteStart; // BitConverter return bytes right to left!
 
-			return new byte[] { FirstByteStart, second, third, fourth };
+			return address;
+		}
+		private string IndexToString(int index) // tested
+		{
+			var address = IndexToBytes(index);
+
+			// concat methods performance compared https://imgur.com/a/5dGE8xE
+			// BitConverter return bytes from smaller to bigger! (right to left)
+			return $"{address[3]}.{address[2]}.{address[1]}.{address[0]}/{NetworkMask}";
 		}
 
-		/// <returns>address dedicated for the pubKey in the format '10.8.*.*/32'</returns>
-		public string EnsureDedicatedAddressForPeer(string pubKey)
+		/// <returns>
+		/// address dedicated for the pubKey in the format 
+		/// '10<b>.</b>0<b>.</b>0<b>.</b>0<b>/</b>32'
+		/// </returns>
+		public string EnsureDedicatedAddressForPeer(string pubKey) // tested
 		{
-			if (_dedicatedAddresses.TryGetValue(pubKey, out var addressBytes))
+			if (_dedicatedAddresses.TryGetValue(pubKey, out var address))
 			{
-				return BytesToAddress(addressBytes);
+				return IndexToString(address);
 			}
 			else
 			{
@@ -127,40 +122,30 @@ namespace vdb_node_api.Services
 				}
 
 				// firstly, try to use count as new address
-				var address = IndexToAddress(_dedicatedAddresses.Count);
-				if (_usedAddresses.Contains(address))
+				int addr = _dedicatedAddresses.Count;
+				if (_usedAddresses.Contains(addr))
 				{
-					byte[] tryedAddress = new byte[4] { 10, 8, default, default };
-					for (int i = 0; i < MaxClients; i++)
+					for (addr = 0; addr < MaxClients; addr++)
 					{
-						byte first = (byte)(1 + i / 255); // max(index) = 255*255 = 65025
-						byte second = (byte)(1 + i % 255);
-
-						tryedAddress[2] = second;
-						tryedAddress[3] = first;
-
-						if (!_usedAddresses.Contains(tryedAddress))
+						if (!_usedAddresses.Contains(addr))
 						{
-							address = tryedAddress;
-
-							_dedicatedAddresses.Add(pubKey, address);
-							_usedAddresses.Add(address);
-							return BytesToAddress(address);
+							_dedicatedAddresses.Add(pubKey, addr);
+							_usedAddresses.Add(addr);
+							return IndexToString(addr);
 						}
 					}
-
-					throw new IndexOutOfRangeException(
-						"Unbale to find unused address for the client.");
 				}
 
-				_dedicatedAddresses.Add(pubKey, address);
-				_usedAddresses.Add(address);
-				return BytesToAddress(address);
+				_dedicatedAddresses.Add(pubKey, addr);
+				_usedAddresses.Add(addr);
+				return IndexToString(addr);
 			}
 		}
 
-		/// <returns>true if the pubKey was successfully found and removed, false otherwise.</returns>
-		private bool RemovePeer(string pubKey)
+		/// <returns>
+		/// true if the pubKey was successfully found and removed, false otherwise.
+		/// </returns>
+		public bool DeletePeer(string pubKey) // tested
 		{
 			if (!_dedicatedAddresses.TryGetValue(pubKey, out var address))
 			{
