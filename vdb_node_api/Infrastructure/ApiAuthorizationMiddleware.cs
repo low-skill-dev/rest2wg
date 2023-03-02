@@ -37,7 +37,7 @@ namespace vdb_node_api.Infrastructure
 			catch (InvalidOperationException) // key is not single
 			{
 				_logger.LogWarning(
-					GetRejectionMessage(context, "Authorization header appeared more than once."));
+					GetRejectionMessage(context, $"Authorization header appeared {header.Count} times, expected 1."));
 
 				context.Response.StatusCode = StatusCodes.Status400BadRequest;
 				return Task.CompletedTask;

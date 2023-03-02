@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 using System.Text;
 using vdb_node_api.Infrastructure;
 using vdb_node_api.Services;
@@ -12,6 +13,7 @@ class Program
     static void Main(string[] args)
     {
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+		
 		builder.Configuration
 			.AddJsonFile("appsettings.json", false)
 			.AddJsonFile("/run/secrets/secrets.json", true)
@@ -19,7 +21,6 @@ class Program
 			.Build();
 
 		builder.Logging.AddConsole();
-		builder.Logging.AddFile("/var/logs/Logs/vdb_node-{Date}.txt");
 
 		builder.Services.AddControllers();
 
@@ -28,6 +29,8 @@ class Program
 		builder.Services.AddSingleton<IpDedicationService>();
 
 	    builder.Services.AddTransient<ApiAuthorizationMiddleware>();
+
+		builder.WebHost.UseKestrel(opts =>opts.ListenAnyIP(5001));
 
 		WebApplication app = builder.Build();
 
