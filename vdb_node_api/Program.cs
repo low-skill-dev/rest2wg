@@ -20,13 +20,9 @@ class Program
 			.Build();
 
 		builder.Logging.AddConsole();
+		builder.Logging.AddFile("/var/logs/Logs/vdb_node-{Date}.txt");
 
 		builder.Services.AddControllers();
-
-		if (builder.Environment.IsDevelopment())
-		{
-			builder.Services.AddSwaggerGen();
-		}
 
 		builder.Services.AddSingleton<SettingsProviderService>();
 		builder.Services.AddSingleton<MasterAccountsService>();
@@ -35,12 +31,6 @@ class Program
 	    builder.Services.AddTransient<ApiAuthorizationMiddleware>();
 
 		WebApplication app = builder.Build();
-
-		if (app.Environment.IsDevelopment())
-		{
-			app.UseSwagger();
-			app.UseSwaggerUI();
-		}
 
 		app.UseCors(opts =>
 		{
