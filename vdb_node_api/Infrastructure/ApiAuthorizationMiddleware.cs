@@ -5,7 +5,6 @@ using vdb_node_api.Models;
 
 namespace vdb_node_api.Infrastructure
 {
-
 	public sealed class ApiAuthorizationMiddleware : IMiddleware
 	{
 		private readonly MasterAccountsService _accountsService;

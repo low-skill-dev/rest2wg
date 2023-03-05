@@ -9,7 +9,9 @@ using vdb_node_wireguard_manipulator;
 
 namespace vdb_node_api.Controllers
 {
-	/* 
+	/* TODO: Create injection protection by validateing than the
+	 * passed public key as actuaaly a base64-encoded string,
+	 * not somethig like ...; wg-quick down wg0;...
 	 */
 
 	[AllowAnonymous]
