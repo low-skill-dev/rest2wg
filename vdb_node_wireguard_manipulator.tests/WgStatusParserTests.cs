@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-#pragma warning disable CS0618;
+#pragma warning disable CS0618
 
 namespace vdb_node_wireguard_manipulator.tests;
 
