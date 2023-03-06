@@ -8,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace vdb_node_wireguard_manipulator
 {
-	public class CommandsExecutor
+	public static class CommandsExecutor
 	{
-		public CommandsExecutor()
-		{
-
-		}
-
-		private async Task<string> RunCommand(string command, bool runWithShell=false)
+		private static async Task<string> RunCommand(string command, bool runWithShell=false)
 		{
 			var psi = new ProcessStartInfo();
 			if(runWithShell) psi.FileName = "/bin/sh";
@@ -40,40 +35,40 @@ namespace vdb_node_wireguard_manipulator
 		}
 
 
-		private string GetAddPeerCommand(string pubKey, string allowedIps)
+		private static string GetAddPeerCommand(string pubKey, string allowedIps)
 		{
 			return $"wg set wg0 peer \"{pubKey}\" allowed-ips {allowedIps}";
 		}
-		private string GetRemovePeerCommand(string pubKey)
+		private static string GetRemovePeerCommand(string pubKey)
 		{
 			return $"wg set wg0 peer \"{pubKey}\" remove";
 		}
-		private string GetWgShowCommand(string wgInterfaceName=null!)
+		private static string GetWgShowCommand(string wgInterfaceName=null!)
 		{
 			return wgInterfaceName is null ?
 				"wg show" : $"wg show {wgInterfaceName}";
 		}
 
-		public async Task<string> AddPeer(string pubKey, string allowedIps)
+		public static async Task<string> AddPeer(string pubKey, string allowedIps)
 		{
 			return await RunCommand(GetAddPeerCommand(pubKey, allowedIps));
 		}
-		public async Task<string> RemovePeer(string pubKey)
+		public static async Task<string> RemovePeer(string pubKey)
 		{
 			return await RunCommand(GetRemovePeerCommand(pubKey));
 		}
-		public async Task<string> GetPeersListUnparsed()
+		public static async Task<string> GetPeersListUnparsed()
 		{
 			return await RunCommand(GetWgShowCommand());
 		}
-		public async Task<(List<WgFullPeerInfo> peers, List<WgInterfaceInfo> interfaces)> GetPeersList()
+		public static  async Task<(List<WgFullPeerInfo> peers, List<WgInterfaceInfo> interfaces)> GetPeersList()
 		{
 			var result =  WgStatusParser.ParsePeersFromWgShow(
 				await RunCommand(GetWgShowCommand()), out var ifs);
 			return (result, ifs);
 		}
 
-		public async Task<List<WgShortPeerInfo>> GetPeersListShortly()
+		public static async Task<List<WgShortPeerInfo>> GetPeersListShortly()
 		{
 			return WgStatusParser.ParsePeersFromWgShow(
 				await RunCommand(GetWgShowCommand()),out _)

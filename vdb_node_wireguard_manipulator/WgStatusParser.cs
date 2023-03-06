@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("vdb_node_wireguard_manipulator.tests")]
+[assembly:InternalsVisibleTo("vdb_node_api.tests")]
 namespace vdb_node_wireguard_manipulator;
 
 

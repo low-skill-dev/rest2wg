@@ -71,7 +71,7 @@ public class WgStatusParserTests
 		}
 		var beforeCreate = GC.GetTotalMemory(true);
 		var resultOutput = millionPeersBuilder.ToString();
-		var afterCreate = GC.GetTotalMemory(true);
+		var afterCreate = GC.GetTotalMemory(false);
 		double outputStrSize = Math.Round((afterCreate - beforeCreate) / 1024d / 1024d, 2);
 
 		var stopwatch = new Stopwatch();
@@ -80,7 +80,7 @@ public class WgStatusParserTests
 		stopwatch.Start();
 		beforeCreate = GC.GetTotalMemory(true);
 		var result = WgStatusParser.ParsePeersFromWgShow(resultOutput, out _);
-		afterCreate = GC.GetTotalMemory(true);
+		afterCreate = GC.GetTotalMemory(false);
 		double resultArrSize = Math.Round((afterCreate - beforeCreate) / 1024d / 1024d, 2);
 		stopwatch.Stop();
 
@@ -116,12 +116,22 @@ public class WgStatusParserTests
 
 		_output.WriteLine($"Result array length was: {result.Count} elements.");
 		_output.WriteLine($"Result approx. array memory usage was (pre-calc): " +
-			$"{Math.Round(resultOutput.Length*2/1024d/1024d,2)} MiB.");
+			$"{Math.Round(resultOutput.Length * 2 / 1024d / 1024d, 2)} MiB.");
 		_output.WriteLine($"Result approx. array memory usage was (GC-calc): " +
 			$"{Math.Round(resultArrSize)} MiB.");
 
 		_output.WriteLine($"Time taken: {stopwatch.ElapsedMilliseconds / 1000} seconds.");
 		_output.WriteLine($"Perparation time: {prepStopwatch.ElapsedMilliseconds / 1000} seconds.");
+
+		var beforeCompressedCreation = GC.GetTotalMemory(true);
+		var compressed = result.Select(WgShortPeerInfo.FromFullInfo);
+		GC.Collect();
+		
+		GC.WaitForFullGCComplete();
+		var afterCompressedCreation = GC.GetTotalMemory(true);
+		double resultCompressedSize = Math.Round((beforeCompressedCreation- afterCompressedCreation) / 1024d, 2);
+		_output.WriteLine($"Result approx. compressed  array memory save was (GC-calc): " +
+			$"{Math.Round(resultCompressedSize)} KiB.");
 	}
 
 	[Fact]

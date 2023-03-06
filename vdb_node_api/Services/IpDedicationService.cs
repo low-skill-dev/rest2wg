@@ -1,4 +1,5 @@
 ﻿using System;
+using vdb_node_wireguard_manipulator;
 
 namespace vdb_node_api.Services
 {
@@ -64,6 +65,8 @@ namespace vdb_node_api.Services
 		private Dictionary<string, int> _dedicatedAddresses { get; set; }
 		private HashSet<int> _usedAddresses { get; set; }
 
+		public int IpsAvailable => MaxClients - _usedAddresses.Count;
+
 		public IpDedicationService()
 		{
 			_dedicatedAddresses = new();
@@ -81,7 +84,7 @@ namespace vdb_node_api.Services
 		private int BytesToIndex(byte[] bytes) // tested
 		{
 			bytes[0] -= FirstIpByteStart;
-			bytes[1]-= SecondIpByteStart;
+			bytes[1] -= SecondIpByteStart;
 			Swap(ref bytes[3], ref bytes[0]);
 			Swap(ref bytes[2], ref bytes[1]);
 			return BitConverter.ToInt32(bytes);
@@ -129,15 +132,13 @@ namespace vdb_node_api.Services
 					{
 						if (!_usedAddresses.Contains(addr))
 						{
-							_dedicatedAddresses.Add(pubKey, addr);
-							_usedAddresses.Add(addr);
+							AddPeer(pubKey, addr);
 							return IndexToString(addr);
 						}
 					}
 				}
 
-				_dedicatedAddresses.Add(pubKey, addr);
-				_usedAddresses.Add(addr);
+				AddPeer(pubKey, addr);
 				return IndexToString(addr);
 			}
 		}
@@ -155,6 +156,42 @@ namespace vdb_node_api.Services
 			{
 				_usedAddresses.Remove(address);
 				return _dedicatedAddresses.Remove(pubKey);
+			}
+		}
+
+		/// <returns>
+		/// true if the pubKey was successfully added, false otherwise.
+		/// </returns>
+		public bool AddPeer(string pubKey, int addressIndex) // tested
+		{
+			_dedicatedAddresses.Add(pubKey, addressIndex);
+			return _usedAddresses.Add(addressIndex);
+		}
+
+		/* Данный метод синхронизрует хранимые адреса с актуальным списком,
+		 * полученным от 'wg show wg0'. Данный метод следует исполнять периодически,
+		 * он обеспечивает корреакцию пиров, который не были отключены должным образом.
+		 * Если не выполнять данный метод, то со временем IpDedicationService забьётся
+		 * адресами, которые уже недействительны. Данный метод, де-факто, находит все
+		 * адреса, которые есть в коллекции _dedicatedAddresses, но отсутствую фактически,
+		 * после чего следует их удаление.		 * 
+		 */
+		public void SyncState(Dictionary<string, WgFullPeerInfo> keyToPeerActulState)
+		{
+			foreach (var key in _dedicatedAddresses.Keys)
+			{
+				if (!keyToPeerActulState.ContainsKey(key))
+				{
+					DeletePeer(key);
+					continue;
+				}
+
+				var parsed = StringToIndex(keyToPeerActulState[key].AllowedIps);
+				if (!_dedicatedAddresses[key].Equals(parsed))
+				{
+					_dedicatedAddresses[key] = parsed;
+					continue;
+				}
 			}
 		}
 	}

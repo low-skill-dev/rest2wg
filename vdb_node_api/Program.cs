@@ -27,8 +27,10 @@ class Program
 		builder.Services.AddSingleton<SettingsProviderService>();
 		builder.Services.AddSingleton<MasterAccountsService>();
 		builder.Services.AddSingleton<IpDedicationService>();
+		builder.Services.AddSingleton<PeersBackgroundService>();
+		builder.Services.AddHostedService(pr => pr.GetRequiredService<PeersBackgroundService>());
 
-	    builder.Services.AddTransient<ApiAuthorizationMiddleware>();
+		builder.Services.AddTransient<ApiAuthorizationMiddleware>();
 
 		builder.WebHost.UseKestrel(opts =>opts.ListenAnyIP(5001));
 

@@ -18,6 +18,10 @@ namespace vdb_node_wireguard_manipulator
 		public string? Transfer;
 		public string? PersistentKeepalive;
 
+		public int HandshakeTotalSeconds =>
+			this.LatestHandshake is null ? int.MaxValue :
+			WgStatusParser.HandshakeToSecond(this.LatestHandshake);
+
 		public WgFullPeerInfo(WgInterfaceInfo? @interface, string publicKey, string? endpoint, string allowedIps, string? latestHandshake, string? transfer, string? persistentKeepalive)
 		{
 			this.Interface = @interface;

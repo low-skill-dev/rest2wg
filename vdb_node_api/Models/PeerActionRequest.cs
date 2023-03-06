@@ -8,5 +8,10 @@
 		{
 			PublicKey = publicKey;
 		}
+
+		public AddPeerResponse CreateAddResponse(string AllowedIps)
+		{
+			return new(this.PublicKey, AllowedIps);
+		}
 	}
 }
