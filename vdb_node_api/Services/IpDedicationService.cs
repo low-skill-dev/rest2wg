@@ -143,6 +143,16 @@ namespace vdb_node_api.Services
 			}
 		}
 
+
+		/// <returns>
+		/// true if the pubKey was successfully added, false otherwise.
+		/// </returns>
+		public bool AddPeer(string pubKey, int addressIndex) // tested
+		{
+			_dedicatedAddresses.Add(pubKey, addressIndex);
+			return _usedAddresses.Add(addressIndex);
+		}
+
 		/// <returns>
 		/// true if the pubKey was successfully found and removed, false otherwise.
 		/// </returns>
@@ -157,15 +167,6 @@ namespace vdb_node_api.Services
 				_usedAddresses.Remove(address);
 				return _dedicatedAddresses.Remove(pubKey);
 			}
-		}
-
-		/// <returns>
-		/// true if the pubKey was successfully added, false otherwise.
-		/// </returns>
-		public bool AddPeer(string pubKey, int addressIndex) // tested
-		{
-			_dedicatedAddresses.Add(pubKey, addressIndex);
-			return _usedAddresses.Add(addressIndex);
 		}
 
 		/* Данный метод синхронизрует хранимые адреса с актуальным списком,

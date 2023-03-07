@@ -1,4 +1,5 @@
-﻿using System.Runtime;
+﻿using System.Diagnostics;
+using System.Runtime;
 using vdb_node_api.Models.ServicesSettings;
 using vdb_node_wireguard_manipulator;
 
@@ -18,6 +19,7 @@ namespace vdb_node_api.Services
 		private readonly IpDedicationService _ipService;
 		private readonly ILogger<PeersBackgroundService> _logger;
 		private Dictionary<string, WgFullPeerInfo> _peers;
+		private Dictionary<string, WgInterfaceInfo> _interfaces;
 		private DateTime _lastUpdateUtc;
 		public PeersBackgroundService(IpDedicationService ipService, SettingsProviderService settingsProvider, ILogger<PeersBackgroundService> logger)
 		{
@@ -26,7 +28,8 @@ namespace vdb_node_api.Services
 			_logger = logger;
 
 			_peers = new();
-			_lastUpdateUtc = DateTime.UtcNow;
+			_interfaces = new();
+			_lastUpdateUtc = DateTime.MinValue;
 		}
 
 
@@ -36,12 +39,26 @@ namespace vdb_node_api.Services
 
 			return _peers.Values;
 		}
+		public async Task<IEnumerable<WgInterfaceInfo>> GetInterfaces(bool forceUpdate = false)
+		{
+			if (forceUpdate) await UpdatePeersListAndSyncConf();
+
+			return _interfaces.Values;
+		}
+
 		public async Task<WgFullPeerInfo?> GetPeerInfo(string pubkey,bool forceUpdate = false)
 		{
 			if (forceUpdate) await UpdatePeersListAndSyncConf();
 
 			return _peers.GetValueOrDefault(pubkey);
 		}
+		public async Task<WgInterfaceInfo?> GetInterfaceInfo(string pubkey, bool forceUpdate = false)
+		{
+			if (forceUpdate) await UpdatePeersListAndSyncConf();
+
+			return _interfaces.GetValueOrDefault(pubkey);
+		}
+
 		public async Task DeletePeer(string pubkey)
 		{
 			_ipService.DeletePeer(pubkey);
@@ -69,6 +86,7 @@ namespace vdb_node_api.Services
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
+			Stopwatch sw = new();
 			while (!stoppingToken.IsCancellationRequested)
 			{
 				// Данное условие проверяет, не был ли список обновлен форсированно.
@@ -76,7 +94,12 @@ namespace vdb_node_api.Services
 				{
 					try
 					{
+						_logger.LogInformation($"Beginning update peers and sync conf.");
+						sw.Restart();
 						await UpdatePeersListAndSyncConf();
+						sw.Stop();
+						_logger.LogInformation($"Completed update peers and sync conf. " +
+							$"Took {sw.ElapsedMilliseconds/1000} seconds.");
 					}
 					catch (Exception ex)
 					{
@@ -107,7 +130,18 @@ namespace vdb_node_api.Services
 				$"Currently storing: {_peers.Count} peers.");
 
 			// Сначала получаем актуальный список пиров
-			_peers = (await CommandsExecutor.GetPeersList()).peers.ToDictionary(x => x.PublicKey);
+			var parsed = await CommandsExecutor.GetPeersList();
+			if (parsed.interfaces.Count > 1)
+			{
+				var message = "There are multiple interfaces was detected. " +
+					"This is currently not supported. Ensure that there is no mistake " +
+					"in the wireguard configuration.";
+
+				_logger.LogCritical(message);
+				throw new AggregateException(message);
+			}
+			_peers = parsed.peers.ToDictionary(x => x.PublicKey);
+			_interfaces = parsed.interfaces.ToDictionary(x => x.PublicKey);
 			// На основании этого списка удаляем все пиры, у которых истек срок жизни
 			await DeleteInactivePeers();
 			// Теперь синхронизирум полученную конфигурацию с IpDedicationService

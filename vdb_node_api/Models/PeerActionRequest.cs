@@ -9,9 +9,9 @@
 			PublicKey = publicKey;
 		}
 
-		public AddPeerResponse CreateAddResponse(string AllowedIps)
+		public AddPeerResponse CreateAddResponse(string allowedIps, string? interfacePublicKey=null)
 		{
-			return new(this.PublicKey, AllowedIps);
+			return new(this.PublicKey, allowedIps, interfacePublicKey);
 		}
 	}
 }

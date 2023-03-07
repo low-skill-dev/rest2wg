@@ -2,13 +2,16 @@
 {
 	public class AddPeerResponse
 	{
-		public string PublicKey { get; set; }
+		public string PeerPublicKey { get; set; }
 		public string AllowedIps { get; set; }
 
-		public AddPeerResponse(string publicKey ,string allowedIps)
+		public string? InterfacePublicKey { get; set; }
+
+		public AddPeerResponse(string peerPublicKey, string allowedIps, string? interfacePublicKey=null)
 		{
-			this.PublicKey = publicKey;
+			this.PeerPublicKey = peerPublicKey;
 			this.AllowedIps = allowedIps;
+			this.InterfacePublicKey = interfacePublicKey;
 		}
 	}
 }

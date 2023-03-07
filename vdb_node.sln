@@ -3,21 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vdb_node_wireguard_manipulator", "vdb_node_wireguard_manipulator\vdb_node_wireguard_manipulator.csproj", "{4D2F8CA7-5C02-4580-B978-93F1800464F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "vdb_node_wireguard_manipulator", "vdb_node_wireguard_manipulator\vdb_node_wireguard_manipulator.csproj", "{4D2F8CA7-5C02-4580-B978-93F1800464F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vdb_node_api", "vdb_node_api\vdb_node_api.csproj", "{7A422B9B-15F3-4E93-8589-608FB3649107}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "vdb_node_api", "vdb_node_api\vdb_node_api.csproj", "{7A422B9B-15F3-4E93-8589-608FB3649107}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vdb_node_wireguard_manipulator.tests", "vdb_node_wireguard_manipulator.tests\vdb_node_wireguard_manipulator.tests.csproj", "{530B4BAC-CE8D-4792-BBBD-00DEC87A55D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "vdb_node_wireguard_manipulator.tests", "vdb_node_wireguard_manipulator.tests\vdb_node_wireguard_manipulator.tests.csproj", "{530B4BAC-CE8D-4792-BBBD-00DEC87A55D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vdb_node_api.tests", "vdb_node_api.tests\vdb_node_api.tests.csproj", "{C1E5EF99-1763-43E2-B58E-3E6F15AB8F1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "vdb_node_api.tests", "vdb_node_api.tests\vdb_node_api.tests.csproj", "{C1E5EF99-1763-43E2-B58E-3E6F15AB8F1B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiKeyGenerator", "ApiKeyGenerator\ApiKeyGenerator.csproj", "{18005BB9-1B65-49AB-A2B7-4ADFE9D4D645}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4D2F8CA7-5C02-4580-B978-93F1800464F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -36,5 +35,12 @@ Global
 		{C1E5EF99-1763-43E2-B58E-3E6F15AB8F1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1E5EF99-1763-43E2-B58E-3E6F15AB8F1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1E5EF99-1763-43E2-B58E-3E6F15AB8F1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18005BB9-1B65-49AB-A2B7-4ADFE9D4D645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18005BB9-1B65-49AB-A2B7-4ADFE9D4D645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18005BB9-1B65-49AB-A2B7-4ADFE9D4D645}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18005BB9-1B65-49AB-A2B7-4ADFE9D4D645}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

@@ -14,10 +14,10 @@ namespace vdb_node_api.Controllers;
 [Route("api/[controller]")]
 [Consumes("application/json")]
 [Produces("application/json")]
-public sealed class PeersController : ControllerBase
+public class PeersController : ControllerBase
 {
-	private readonly ILogger<PeersController> _logger;
-	private readonly PeersBackgroundService _peersService;
+	protected readonly ILogger<PeersController> _logger;
+	protected readonly PeersBackgroundService _peersService;
 	public PeersController(PeersBackgroundService peersService, ILogger<PeersController> logger)
 	{
 		_logger = logger;
@@ -30,7 +30,7 @@ public sealed class PeersController : ControllerBase
 	 * like ...; wg-quick down wg0;...
 	 */
 	[NonAction]
-	private bool ValidatePubkey(string pk)
+	protected bool ValidatePubkey(string pk)
 	{
 		return !string.IsNullOrWhiteSpace(pk)
 			&& pk.Length < 1024
@@ -69,7 +69,9 @@ public sealed class PeersController : ControllerBase
 		{
 			var ip = await _peersService.AddPeer(request.PublicKey);
 			_logger.LogInformation($"Successfully added new peer {request.PublicKey} on {ip}.");
-			return Ok(request.CreateAddResponse(ip));
+			return Ok(
+				request.CreateAddResponse(ip, 
+				(await _peersService.GetInterfaces()).SingleOrDefault()?.PublicKey));
 		}
 		catch (Exception ex)
 		{

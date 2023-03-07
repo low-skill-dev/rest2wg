@@ -10,14 +10,19 @@ namespace vdb_node_api;
 
 class Program
 {
-    static void Main(string[] args)
-    {
+	static void Main(string[] args)
+	{
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-		
+
 		builder.Configuration
 			.AddJsonFile("appsettings.json", false)
-			.AddJsonFile("/run/secrets/secrets.json", true)
-			.AddEnvironmentVariables()
+			.AddJsonFile("/run/secrets/aspsecrets.json",
+#if DEBUG
+			true // secrets setup is optional if debug
+#elif RELEASE
+			false // not optional if release
+#endif
+			).AddEnvironmentVariables()
 			.Build();
 
 		builder.Logging.AddConsole();
@@ -32,7 +37,7 @@ class Program
 
 		builder.Services.AddTransient<ApiAuthorizationMiddleware>();
 
-		builder.WebHost.UseKestrel(opts =>opts.ListenAnyIP(5001));
+		builder.WebHost.UseKestrel(opts => opts.ListenAnyIP(5001));
 
 		WebApplication app = builder.Build();
 
