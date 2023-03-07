@@ -10,12 +10,12 @@ namespace vdb_node_wireguard_manipulator
 {
 	public static class CommandsExecutor
 	{
-		private static async Task<string> RunCommand(string command, bool runWithShell=false)
+		private static async Task<string> RunCommand(string command, string fileName= @"wg")
 		{
 			var psi = new ProcessStartInfo();
-			if(runWithShell) psi.FileName = "/bin/sh";
+			psi.FileName = fileName;
 
-			psi.Arguments = runWithShell? $"-c \"{command}\"" : command;
+			psi.Arguments = command;
 			psi.RedirectStandardOutput = true;
 			psi.UseShellExecute = false;
 			psi.CreateNoWindow = true;
@@ -37,16 +37,16 @@ namespace vdb_node_wireguard_manipulator
 
 		private static string GetAddPeerCommand(string pubKey, string allowedIps)
 		{
-			return $"wg set wg0 peer \"{pubKey}\" allowed-ips {allowedIps}";
+			return $"set wg0 peer \"{pubKey}\" allowed-ips {allowedIps}";
 		}
 		private static string GetRemovePeerCommand(string pubKey)
 		{
-			return $"wg set wg0 peer \"{pubKey}\" remove";
+			return $"set wg0 peer \"{pubKey}\" remove";
 		}
 		private static string GetWgShowCommand(string wgInterfaceName=null!)
 		{
 			return wgInterfaceName is null ?
-				"wg show" : $"wg show {wgInterfaceName}";
+				"show" : $"wg show {wgInterfaceName}";
 		}
 
 		public static async Task<string> AddPeer(string pubKey, string allowedIps)
