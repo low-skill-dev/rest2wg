@@ -9,15 +9,18 @@ using vdb_node_wireguard_manipulator;
 
 namespace vdb_node_api.Controllers;
 
+
+
+
 [AllowAnonymous]
 [ApiController]
 [Route("api/[controller]")]
 [Consumes("application/json")]
 [Produces("application/json")]
-public class PeersController : ControllerBase
+public sealed class PeersController : ControllerBase
 {
-	protected readonly ILogger<PeersController> _logger;
-	protected readonly PeersBackgroundService _peersService;
+	private readonly ILogger<PeersController> _logger;
+	private readonly PeersBackgroundService _peersService;
 	public PeersController(PeersBackgroundService peersService, ILogger<PeersController> logger)
 	{
 		_logger = logger;
@@ -29,13 +32,7 @@ public class PeersController : ControllerBase
 	 * actually a base64-encoded string, not somethig 
 	 * like ...; wg-quick down wg0;...
 	 */
-	[NonAction]
-	protected bool ValidatePubkey(string pk)
-	{
-		return !string.IsNullOrWhiteSpace(pk)
-			&& pk.Length < 1024
-			&& Convert.TryFromBase64String(pk, new byte[pk.Length], out _);
-	}
+
 
 	[HttpGet]
 	public async Task<IActionResult> GetPeersList()
@@ -46,7 +43,7 @@ public class PeersController : ControllerBase
 	[HttpPost]
 	public async Task<IActionResult> GetPeerInfo([Required][FromBody] PeerActionRequest request)
 	{
-		if (!ValidatePubkey(request.PublicKey))
+		if (!this.ValidatePubkey(request.PublicKey))
 		{
 			_logger.LogWarning($"Invalid pubkey provided. Pubkey was: {request.PublicKey}.");
 			return BadRequest("Pubkey format is invalid");
@@ -59,7 +56,7 @@ public class PeersController : ControllerBase
 	[HttpPut]
 	public async Task<IActionResult> AddPeer([Required][FromBody] PeerActionRequest request)
 	{
-		if (!ValidatePubkey(request.PublicKey))
+		if (!this.ValidatePubkey(request.PublicKey))
 		{
 			_logger.LogWarning($"Invalid pubkey provided. Pubkey was: {request.PublicKey}.");
 			return BadRequest("Pubkey format is invalid");
@@ -92,7 +89,7 @@ public class PeersController : ControllerBase
 	[HttpDelete]
 	public async Task<IActionResult> DeletePeer([Required][FromBody] PeerActionRequest request)
 	{
-		if (!ValidatePubkey(request.PublicKey))
+		if (!this.ValidatePubkey(request.PublicKey))
 		{
 			_logger.LogWarning($"Invalid pubkey provided. Pubkey was: {request.PublicKey}.");
 			return BadRequest("Pubkey format is invalid");

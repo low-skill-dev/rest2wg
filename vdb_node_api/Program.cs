@@ -5,6 +5,9 @@ using System.Net;
 using System.Text;
 using vdb_node_api.Infrastructure;
 using vdb_node_api.Services;
+#if DEBUG
+using Microsoft.OpenApi.Models;
+#endif
 
 namespace vdb_node_api;
 
@@ -29,6 +32,17 @@ class Program
 
 		builder.Services.AddControllers();
 
+#if DEBUG
+		if (builder.Environment.IsDevelopment())
+		{
+			builder.Services.AddSwaggerGen(c =>
+			{
+				//c.SwaggerDoc("v1", new OpenApiInfo { Title = "TestSwagger", Version = "v1" });
+				c.CustomSchemaIds(x => x.FullName);
+			});
+		}
+#endif
+
 		builder.Services.AddSingleton<SettingsProviderService>();
 		builder.Services.AddSingleton<MasterAccountsService>();
 		builder.Services.AddSingleton<IpDedicationService>();
@@ -41,6 +55,7 @@ class Program
 
 		WebApplication app = builder.Build();
 
+
 		app.UseCors(opts =>
 		{
 			opts.AllowAnyOrigin();
@@ -48,10 +63,20 @@ class Program
 			opts.AllowAnyHeader();
 		});
 
-
+#if TRUE //disable for swagger usage
 		app.UseMiddleware<ApiAuthorizationMiddleware>();
+#endif
+
 		app.UseRouting();
 		app.MapControllers();
+
+#if DEBUG
+		if (app.Environment.IsDevelopment())
+		{
+			app.UseSwagger();
+			app.UseSwaggerUI();
+		}
+#endif
 
 		app.Run();
 	}

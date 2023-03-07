@@ -10,4 +10,9 @@
     <ProjectReference Include="..\vdb_node_wireguard_manipulator\vdb_node_wireguard_manipulator.csproj" />
   </ItemGroup>
 
+	<ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	</ItemGroup>
+
 </Project>
