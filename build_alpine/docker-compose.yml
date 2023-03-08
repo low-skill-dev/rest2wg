@@ -15,6 +15,7 @@ services:
       - ./pre-wg0.conf:/etc/wireguard/pre-wg0.conf:ro
       - ./pre-setup.sh:/etc/wireguard/pre-setup.sh:rw
       - ./publish:/home/node_api_ro:ro
+      - ./aspsecrets.json:/run/secrets/aspsecrets.json:ro
     cap_add:
       - NET_ADMIN
     sysctls:

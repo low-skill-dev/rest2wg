@@ -8,10 +8,13 @@ namespace vdb_node_api.Services
 	public sealed class MasterAccountsService
 	{
 		private readonly List<byte[]> _mastersKeyHashes;
-		public MasterAccountsService(SettingsProviderService settingsProvider)
+		public MasterAccountsService(SettingsProviderService settingsProvider, EnvironmentProvider environmentProvider)
 		{
 			_mastersKeyHashes = settingsProvider.MasterAccounts
 				.Select(x => Convert.FromBase64String(x.KeyHashBase64)).ToList();
+
+			if(environmentProvider.AUTH_KEYHASH is not null)
+				_mastersKeyHashes.Add(environmentProvider.AUTH_KEYHASH);
 		}
 
 		/// <returns>true if passed key is valid, false otherwise.</returns>

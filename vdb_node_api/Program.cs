@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using vdb_node_api.Infrastructure;
 using vdb_node_api.Services;
+
 #if DEBUG
 using Microsoft.OpenApi.Models;
 #endif
@@ -18,14 +19,9 @@ class Program
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 		builder.Configuration
-			.AddJsonFile("appsettings.json", false)
-			.AddJsonFile("/run/secrets/aspsecrets.json",
-#if DEBUG
-			true // secrets setup is optional if debug
-#elif RELEASE
-			false // not optional if release
-#endif
-			).AddEnvironmentVariables()
+			.AddJsonFile("./appsettings.json", true)
+			.AddJsonFile("/run/secrets/aspsecrets.json", true)
+			.AddEnvironmentVariables()
 			.Build();
 
 		builder.Logging.AddConsole();
@@ -43,6 +39,7 @@ class Program
 		}
 #endif
 
+		builder.Services.AddSingleton<EnvironmentProvider>();
 		builder.Services.AddSingleton<SettingsProviderService>();
 		builder.Services.AddSingleton<MasterAccountsService>();
 		builder.Services.AddSingleton<IpDedicationService>();
@@ -51,7 +48,7 @@ class Program
 
 		builder.Services.AddTransient<ApiAuthorizationMiddleware>();
 
-		builder.WebHost.UseKestrel(opts => opts.ListenAnyIP(5001));
+		builder.WebHost.UseKestrel(opts => opts.ListenAnyIP(5000));
 
 		WebApplication app = builder.Build();
 
@@ -63,9 +60,11 @@ class Program
 			opts.AllowAnyHeader();
 		});
 
-#if TRUE //disable for swagger usage
-		app.UseMiddleware<ApiAuthorizationMiddleware>();
-#endif
+		var envProvider = app.Services.GetRequiredService<EnvironmentProvider>();
+		if (!envProvider.ALLOW_NOAUTH)
+		{
+			app.UseMiddleware<ApiAuthorizationMiddleware>();
+		}
 
 		app.UseRouting();
 		app.MapControllers();
