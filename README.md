@@ -2,8 +2,6 @@
 ![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-%230D597F.svg?style=for-the-badge&logo=alpine-linux&logoColor=white) 
 ![Wireguard](https://img.shields.io/badge/wireguard-%2388171A.svg?style=for-the-badge&logo=wireguard&logoColor=white)
 ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
-![License - GPL v3](https://img.shields.io/badge/License-GPL_3-2ea44f?style=for-the-badge)
-![Stage - ALPHA](https://img.shields.io/badge/stage-alpha-ADD8E6?style=for-the-badge)
 # rest2wireguard
 ### REST2WG is an Alpine-based WebAPI-managed Wireguard server.
 <br/>
