@@ -60,15 +60,6 @@ class Program
 			opts.AllowAnyHeader();
 		});
 
-		var envProvider = app.Services.GetRequiredService<EnvironmentProvider>();
-		if (!envProvider.ALLOW_NOAUTH)
-		{
-			app.UseMiddleware<ApiAuthorizationMiddleware>();
-		}
-
-		app.UseRouting();
-		app.MapControllers();
-
 #if DEBUG
 		if (app.Environment.IsDevelopment())
 		{
@@ -76,6 +67,15 @@ class Program
 			app.UseSwaggerUI();
 		}
 #endif
+
+		var envProvider = app.Services.GetRequiredService<EnvironmentProvider>();
+		if (!(envProvider.ALLOW_NOAUTH ?? false))
+		{
+			app.UseMiddleware<ApiAuthorizationMiddleware>();
+		}
+
+		app.UseRouting();
+		app.MapControllers();
 
 		app.Run();
 	}

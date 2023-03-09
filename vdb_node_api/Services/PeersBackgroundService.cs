@@ -81,6 +81,7 @@ namespace vdb_node_api.Services
 				throw new AggregateException(result);
 			}
 
+			_peers.Add(pubkey, new(_interfaces.Values.SingleOrDefault(), pubkey, null, ip, null, null, null));
 			return ip;
 		}
 
