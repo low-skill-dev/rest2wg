@@ -6,5 +6,5 @@
 <br/>
 
 ## Quick start:
-    docker run --cap-add NET_ADMIN -p 51850:51820 -p 51851:5000 --env REST2WG_ALLOW_NOAUTH=true luminodiode/rest2wireguard
-You will get the image listening 51850 by Wireguard and 51851 by WebAPI. Dont forget to allow it in your UFW if there is some.
+    docker run --cap-add NET_ADMIN -p 51850:51820/udp -p 51851:5000/tcp --env REST2WG_ALLOW_NOAUTH=true luminodiode/rest2wireguard
+You will get the image listening 51850 by Wireguard and 51851 by WebAPI without authorization request header requred. Dont forget to allow it in your UFW if there is some.
