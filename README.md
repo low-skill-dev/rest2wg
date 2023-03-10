@@ -59,4 +59,4 @@ The first value is the key itself, base64 encoded. You will need to pass it with
 The second value is the key hash, base64 encoded. You will need to pass it to your docker container with the enviroment variable (if you want to pass it using docker secrets - read the full reference below):
 
     --env REST2WG_AUTH_KEYHASH_BASE64=EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
-    
+   
