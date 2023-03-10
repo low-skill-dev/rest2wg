@@ -17,14 +17,14 @@ Now you can access next endpoints:
 - **PUT /api/peers** - add new peer
 - **DELETE /api/peers** - remove existing peer
 
-Where for each POST/PUT/DELETE endpoint you must provide application/json body in the next format:
+Where for PUT and DELETE endpoints you must provide application/json body in the next format:
 
     {
         "publicKey":"LwkXubXSXLOzQPK0a6PQp1DWz08lsfk+Oyp7s1056H8="
     }
     
     
-And the response format for peers POST and PUT endpoints will be:
+And the response format for PUT endpoint will be:
 
     {
         "peerPublicKey": "LwkXubXSXLOzQPK0a6PQp1DWz08lsfk+Oyp7s1056H8=",
@@ -44,3 +44,19 @@ Now you can connect wireguard client to your server. Example configuration:
     AllowedIPs = 0.0.0.0/0
     Endpoint = YOUR.SERVER.IP.ADDRESS:51850
 
+If you want to use authorization you need to leave REST2WG_ALLOW_NOAUTH unset (false is the default value). Then generate the key and its hash. You can [open this url](https://dotnetfiddle.net/ldbnVB), click 'Run' and copy generated key-hash pair or run [this code](ApiKeyGenerator/Program.cs) on your machine locally. You will get the next output:
+
+    Key base64 (for client):
+    zXCzMDwZt/bMTrT+rt08cH6XH+ut61LJRKEa+OLRJEMgegUv4HLxp9sB1+FnKJYkImn7Sh64eDRs1PtwV5ptmQ==
+
+    Key hash base64 (for server):
+    EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
+    
+The first value is the key itself, base64 encoded. You will need to pass it with your requests Authorization header in the next format:
+
+    Authorization: Basic zXCzMDwZt/bMTrT+rt08cH6XH+ut61LJRKEa+OLRJEMgegUv4HLxp9sB1+FnKJYkImn7Sh64eDRs1PtwV5ptmQ==
+    
+The second value is the key hash, base64 encoded. You will need to pass it to your docker container with the enviroment variable (if you want to pass it using docker secrets - read the full reference below):
+
+    --env REST2WG_AUTH_KEYHASH_BASE64=EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
+    
