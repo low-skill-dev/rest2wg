@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 
-var bytes = RandomNumberGenerator.GetBytes(512 / 8);
-var keyHash = SHA512.HashData(bytes);
+byte[] bytes = RandomNumberGenerator.GetBytes(512 / 8);
+byte[] keyHash = SHA512.HashData(bytes);
 
 Console.WriteLine("Key base64        (for client):");
 Console.WriteLine(Convert.ToBase64String(bytes));

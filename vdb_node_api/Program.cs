@@ -1,22 +1,16 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net;
-using System.Text;
 using vdb_node_api.Infrastructure;
 using vdb_node_api.Services;
 
 #if DEBUG
-using Microsoft.OpenApi.Models;
 #endif
 
 namespace vdb_node_api;
 
-class Program
+internal class Program
 {
-	static void Main(string[] args)
+	private static void Main(string[] args)
 	{
-		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+		var builder = WebApplication.CreateBuilder(args);
 
 		builder.Configuration
 			.AddJsonFile("./appsettings.json", true)
@@ -48,9 +42,7 @@ class Program
 
 		builder.Services.AddTransient<ApiAuthorizationMiddleware>();
 
-		builder.WebHost.UseKestrel(opts => opts.ListenAnyIP(5000));
-
-		WebApplication app = builder.Build();
+		var app = builder.Build();
 
 
 		app.UseCors(opts =>

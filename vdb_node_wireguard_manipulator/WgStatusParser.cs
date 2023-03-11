@@ -1,30 +1,37 @@
 ﻿using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("vdb_node_wireguard_manipulator.tests")]
-[assembly:InternalsVisibleTo("vdb_node_api.tests")]
+[assembly: InternalsVisibleTo("vdb_node_api.tests")]
 namespace vdb_node_wireguard_manipulator;
 
 
-/* TODO: Create function for parsing peers from the StreamReader,
- * which is used in ProcessInfo.StandardOutput.
- */
-internal static class WgStatusParser
+internal class WgStatusParser
 {
-	private static string GetValueFromLine(string text, int LineStartIndex)
+	protected const string InterfaceStartString = @"interface";
+	protected const string InterfacePublicKeyString = @"public key";
+	protected const string PeerStartString = @"peer";
+	protected const string PeerEndpointString = @"endpoint";
+	protected const string PeerAllowedIpsString = @"allowed ips";
+	protected const string PeerLatestHandshakeString = @"latest handshake";
+	protected const string PeerTransferStringString = @"transfer";
+	protected const string PeerPersistentKeepaliveString = @"persistent keepalive";
+
+	protected static string GetValueFromLine(string text, int LineStartIndex)
 	{
 		int currentPos = LineStartIndex;
 		currentPos = FindNextColon(text, currentPos) + 1;
 		currentPos = FindNextNonWhitespace(text, currentPos);
-		var valueBefore = FindNextRN(text, currentPos);
-		var value = valueBefore > 0 ?
+		int valueBefore = FindNextRN(text, currentPos);
+		string value = valueBefore > 0 ?
 			Substring(text, currentPos, valueBefore - 1) : text.Substring(currentPos);
 		return value;
 	}
-	private static string Substring(string s, int startIndex, int endIndex)
+
+	protected static string Substring(string s, int startIndex, int endIndex)
 	{
 		return s.Substring(startIndex, endIndex - startIndex + 1);
 	}
-	private static int FindNext(string text, int start, Func<char, bool> predicate)
+	protected static int FindNext(string text, int start, Func<char, bool> predicate)
 	{
 		for (int i = start; i < text.Length; i++)
 		{
@@ -32,27 +39,19 @@ internal static class WgStatusParser
 		}
 		return -1;
 	}
-	private static int FindNextNonWhitespace(string text, int start)
+	protected static int FindNextNonWhitespace(string text, int start)
 	{
 		return FindNext(text, start, x => !char.IsWhiteSpace(x));
 	}
-	private static int FindNextWhitespace(string text, int start)
-	{
-		return FindNext(text, start, char.IsWhiteSpace);
-	}
-	private static int FindNextNewLine(string text, int start)
-	{
-		return FindNext(text, start, x => x == '\n');
-	}
-	private static int FindNextRN(string text, int start)
+	protected static int FindNextRN(string text, int start)
 	{
 		return FindNext(text, start, x => x == '\r' || x == '\n');
 	}
-	private static int FindNextColon(string text, int start)
+	protected static int FindNextColon(string text, int start)
 	{
 		return FindNext(text, start, x => x == ':');
 	}
-	private static bool StartsWith(string text, string search, int start = 0)
+	protected static bool StartsWith(string text, string search, int start = 0)
 	{
 		if (search.Length > text.Length - start) return false;
 		for (int i = 0; i < search.Length; i++)
@@ -62,41 +61,80 @@ internal static class WgStatusParser
 		return true;
 	}
 
-	private const string InterfaceStartString = @"interface";
-	private const string InterfacePublicKeyString = @"public key";
-	private const string PeerStartString = @"peer";
-	private const string PeerEndpointString = @"endpoint";
-	private const string PeerAllowedIpsString = @"allowed ips";
-	private const string PeerLatestHandshakeString = @"latest handshake";
-	private const string PeerTransferStringString = @"transfer";
-	private const string PeerPersistentKeepaliveString = @"persistent keepalive";
+	internal static int HandshakeToSecond(string latestHanshake)
+	{
+		int resultSecs = 0;
+
+		for (int i = 0; i < latestHanshake.Length; i++)
+		{
+			int currValueStart = FindNext(latestHanshake, i, char.IsDigit);
+			if (currValueStart == -1) break;
+			int afterValueSpace = FindNext(latestHanshake, currValueStart, char.IsWhiteSpace);
+
+			int currValue = int.Parse(latestHanshake.Substring(currValueStart, afterValueSpace - currValueStart));
+
+			int signatureStart = FindNext(latestHanshake, afterValueSpace + 1, char.IsLetter);
+			int afterSignatureSpace = FindNext(latestHanshake, signatureStart, char.IsWhiteSpace);
+
+			string currSig = latestHanshake.Substring(signatureStart, afterSignatureSpace - signatureStart);
+
+			const int sec = 1;
+			const int min = 60 * sec;
+			const int hou = 60 * min;
+			const int day = 24 * hou;
+
+			if (currSig.StartsWith("day"))
+				resultSecs += currValue * day;
+			else if (currSig.StartsWith("hour"))
+				resultSecs += currValue * hou;
+			else if (currSig.StartsWith("minute"))
+				resultSecs += currValue * min;
+			else if (currSig.StartsWith("second"))
+				resultSecs += currValue * sec;
+
+			i = afterSignatureSpace;
+		}
+
+		return resultSecs;
+	}
+
+	/*
+	  
+	 	protected static int FindNextWhitespace(string text, int start)
+	{
+		return FindNext(text, start, char.IsWhiteSpace);
+	}
+	protected static int FindNextNewLine(string text, int start)
+	{
+		return FindNext(text, start, x => x == '\n');
+	}
 
 	public static List<WgFullPeerInfo> ParsePeersFromWgShow(string output, out List<WgInterfaceInfo> interfaces)
 	{
-		/*
-		interface: wg0
-		public key: Kq0LygX5ESfSpIDQO0k4dGSCnOAIZlJDPFacBeOBMCE=
-		private key: (hidden)
-		listening port: 51820
+		
+		//interface: wg0
+		//public key: Kq0LygX5ESfSpIDQO0k4dGSCnOAIZlJDPFacBeOBMCE=
+		//private key: (hidden)
+		//listening port: 51820
 
-		peer: zO2jr59gppRHrPlaVshrm/AH8YUzVGToGDvoeS8j4CI=
-		  endpoint: 31.173.84.131:21260
-		  allowed ips: 10.8.0.101/32
-		  latest handshake: 9 hours, 18 minutes, 25 seconds ago
-		  transfer: 20.19 MiB received, 683.31 MiB sent
-		  persistent keepalive: every 25 seconds
+		//peer: zO2jr59gppRHrPlaVshrm/AH8YUzVGToGDvoeS8j4CI=
+		//  endpoint: 31.173.84.131:21260
+		//  allowed ips: 10.8.0.101/32
+		//  latest handshake: 9 hours, 18 minutes, 25 seconds ago
+		//  transfer: 20.19 MiB received, 683.31 MiB sent
+		//  persistent keepalive: every 25 seconds
 
-		peer: MTy1q7mVlyuUkCnvz0ZrXPCTSzhbjNMbhzfJU/gSsF8=
-		  endpoint: 31.173.82.117:25566
-		  allowed ips: 10.8.0.100/32
-		  latest handshake: 1 day, 13 hours, 13 minutes, 53 seconds ago
-		  transfer: 13.19 MiB received, 176.12 MiB sent
-		  persistent keepalive: every 25 seconds
+		//peer: MTy1q7mVlyuUkCnvz0ZrXPCTSzhbjNMbhzfJU/gSsF8=
+		//  endpoint: 31.173.82.117:25566
+		//  allowed ips: 10.8.0.100/32
+		//  latest handshake: 1 day, 13 hours, 13 minutes, 53 seconds ago
+		//  transfer: 13.19 MiB received, 176.12 MiB sent
+		//  persistent keepalive: every 25 seconds
 
-		peer: V1evhjZQhhygsdrtriAb5AzuUuE8SkQNHJ4YAYdxGQs=
-		  allowed ips: 10.0.0.0/32
-		  persistent keepalive: every 25 seconds
-		*/
+		//peer: V1evhjZQhhygsdrtriAb5AzuUuE8SkQNHJ4YAYdxGQs=
+		//  allowed ips: 10.0.0.0/32
+		//  persistent keepalive: every 25 seconds
+		
 
 		string value;
 		List<WgFullPeerInfo> result = new();
@@ -123,7 +161,7 @@ internal static class WgStatusParser
 			{
 				currentPos += InterfaceStartString.Length;
 				if (interfaceInfo is not null) foundInterfaces.Add(interfaceInfo);
-				interfaceInfo = new(null!, null!);
+				interfaceInfo = new(null!);
 
 				value = GetValueFromLine(output, currentPos);
 				interfaceInfo.Name = value;
@@ -250,7 +288,7 @@ internal static class WgStatusParser
 			{
 				currentPos += PeerStartString.Length;
 				if (peerInfo is not null) result.Add(peerInfo);
-				peerInfo = new(GetValueFromLine(output, currentPos),int.MaxValue);
+				peerInfo = new(GetValueFromLine(output, currentPos),null!,int.MaxValue);
 
 				currentPos += peerInfo.PublicKey.Length + 1;
 			}
@@ -284,42 +322,7 @@ internal static class WgStatusParser
 		return result;
 	}
 
-	internal static int HandshakeToSecond(string latestHanshake)
-	{
-		int resultSecs = 0;
-
-		for (int i = 0; i < latestHanshake.Length; i++)
-		{
-			int currValueStart = FindNext((string)latestHanshake, i, char.IsDigit);
-			if (currValueStart == -1) break;
-			int afterValueSpace = FindNext((string)latestHanshake, currValueStart, char.IsWhiteSpace);
-
-			var currValue = int.Parse(latestHanshake.Substring(currValueStart, afterValueSpace - currValueStart));
-
-			var signatureStart = FindNext((string)latestHanshake, afterValueSpace + 1, char.IsLetter);
-			var afterSignatureSpace = FindNext((string)latestHanshake, signatureStart, char.IsWhiteSpace);
-
-			var currSig = latestHanshake.Substring(signatureStart, afterSignatureSpace - signatureStart);
-
-			const int sec = 1;
-			const int min = 60 * sec;
-			const int hou = 60 * min;
-			const int day = 24 * hou;
-
-			if (currSig.StartsWith("day"))
-				resultSecs += currValue * day;
-			else if (currSig.StartsWith("hour"))
-				resultSecs += currValue * hou;
-			else if (currSig.StartsWith("minute"))
-				resultSecs += currValue * min;
-			else if (currSig.StartsWith("second"))
-				resultSecs += currValue * sec;
-
-			i = afterSignatureSpace;
-		}
-
-		return resultSecs;
 	}
-
+*/
 }
 

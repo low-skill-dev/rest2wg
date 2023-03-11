@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
-using vdb_node_api.Models;
-using vdb_node_api.Models.ServicesSettings;
+﻿using vdb_node_api.Models.Runtime;
 
 namespace vdb_node_api.Services;
 
@@ -44,7 +41,7 @@ public class SettingsProviderService
 		{
 			var fromConf = _configuration.GetSection(nameof(PeersBackgroundServiceSettings))
 				.Get<PeersBackgroundServiceSettings>()
-				?? new PeersBackgroundServiceSettings(3600, 3600);
+				?? new PeersBackgroundServiceSettings(3600, 600);
 
 			// overriding by env
 			if (_environment.REVIEW_INTERVAL is not null)

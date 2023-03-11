@@ -1,24 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace vdb_node_wireguard_manipulator;
+﻿namespace vdb_node_wireguard_manipulator;
 
 public class WgShortPeerInfo
 {
-	public string PublicKey;
-	public int HandshakeSecondsAgo = int.MaxValue;
+	public string PublicKey { get; set; }
+	public string AllowedIps { get; set; }
+	public int HandshakeSecondsAgo { get; set; } = int.MaxValue;
 
-	public WgShortPeerInfo(string publicKey, int handshakeSecondsAgo)
+	public WgShortPeerInfo(string publicKey, string allowedIps, int handshakeSecondsAgo)
 	{
-		this.PublicKey = publicKey;
-		this.HandshakeSecondsAgo = handshakeSecondsAgo;
+		PublicKey = publicKey;
+		AllowedIps = allowedIps;
+		HandshakeSecondsAgo = handshakeSecondsAgo;
 	}
-
-	public static WgShortPeerInfo FromFullInfo(WgFullPeerInfo full)
-	 => new(full.PublicKey, full.LatestHandshake is null ?
-		 int.MaxValue : WgStatusParser.HandshakeToSecond(full.LatestHandshake));
 }
 

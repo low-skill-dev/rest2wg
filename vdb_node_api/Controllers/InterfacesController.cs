@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using vdb_node_api.Models;
 using vdb_node_api.Services;
+using vdb_node_wireguard_manipulator;
 
 namespace vdb_node_api.Controllers;
 
@@ -11,10 +10,10 @@ namespace vdb_node_api.Controllers;
 [Route("api/[controller]")]
 [Consumes("application/json")]
 [Produces("application/json")]
-public class InterfacesController : ControllerBase
+public sealed class InterfacesController : ControllerBase
 {
-	protected readonly ILogger<PeersController> _logger;
-	protected readonly PeersBackgroundService _peersService;
+	private readonly ILogger<PeersController> _logger;
+	private readonly PeersBackgroundService _peersService;
 	public InterfacesController(PeersBackgroundService peersService, ILogger<PeersController> logger)
 	{
 		_logger = logger;
@@ -22,22 +21,10 @@ public class InterfacesController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<IActionResult> GetInterfacesList()
+	public IActionResult GetInterfaceInfo()
 	{
-		return Ok(await _peersService.GetInterfaces());
-	}
-
-	[HttpPost]
-	public async Task<IActionResult> GetInterfaceInfo([Required][FromBody] InterfaceActionRequest request)
-	{
-		if (!this.ValidatePubkey(request.PublicKey))
-		{
-			_logger.LogWarning($"Invalid pubkey provided. Pubkey was: {request.PublicKey}.");
-			return BadRequest("Pubkey format is invalid");
-		}
-
-		var result = await _peersService.GetInterfaceInfo(request.PublicKey);
-		return result is null ? NotFound() : Ok(result);
+		return _peersService.InterfacePubkey is null ? NoContent()
+			: Ok(new WgInterfaceInfo(_peersService.InterfacePubkey));
 	}
 }
 
