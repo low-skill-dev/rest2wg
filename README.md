@@ -5,7 +5,6 @@
 [![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)](https://asp.net)
 # rest2wireguard
 ### Alpine-based TLS-securely WebAPI-managed Wireguard server.
-### Open-source, GPLv3-licensed.
 <br/>
 
 ## Quick start:
