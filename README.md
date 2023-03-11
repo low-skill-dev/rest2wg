@@ -2,37 +2,62 @@
 ![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-%230D597F.svg?style=for-the-badge&logo=alpine-linux&logoColor=white) 
 ![Wireguard](https://img.shields.io/badge/wireguard-%2388171A.svg?style=for-the-badge&logo=wireguard&logoColor=white)
 ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
-![License - GPL v3](https://img.shields.io/badge/License-GPL_3-2ea44f?style=for-the-badge)
-![Stage - ALPHA](https://img.shields.io/badge/stage-alpha-ADD8E6?style=for-the-badge)
 # rest2wireguard
 ### REST2WG is an Alpine-based WebAPI-managed Wireguard server.
 <br/>
 
 ## Quick start:
-    docker run --cap-add NET_ADMIN -p 51850:51820/udp -p 51851:5000/tcp --env REST2WG_ALLOW_NOAUTH=true luminodiode/rest2wireguard
+    docker run --cap-add NET_ADMIN -p 51850:51820/udp -p 51851:5000/tcp --env REST2WG_ALLOW_NOAUTH=true --env REST2WG_HANDSHAKE_AGO_LIMIT=0 luminodiode/rest2wireguard
 You will get the image listening 51850 by Wireguard and 51851 by WebAPI without authorization request header required. Dont forget to allow it in your UFW if there is some:
 
     ufw allow 51850/udp && ufw allow 51851/tcp
     
 Now you can access next endpoints:
 - **GET /api/peers** - get list of all peers
-- **POST /api/peers** - get info of peer
 - **PUT /api/peers** - add new peer
 - **DELETE /api/peers** - remove existing peer
 
-Where for each POST/PUT/DELETE endpoint you must provide application/json body in the next format:
+Where for PUT and DELETE endpoints you must provide application/json body in the next format:
 
     {
-        "publicKey":"AjSn6JHWRiGcllTCaqOPTst1WpPUb//5O3aG/qD1nkM="
+        "publicKey":"LwkXubXSXLOzQPK0a6PQp1DWz08lsfk+Oyp7s1056H8="
     }
     
     
-And the response format for peers POST and PUT endpoints will be:
+And the response format for PUT endpoint will be:
 
     {
-        "peerPublicKey": "AjSn6JHWRiGcllTCaqOPTst1WpPUb//5O3aG/qD1nkM=",
-        "allowedIps": "10.6.0.0/32",
+        "peerPublicKey": "LwkXubXSXLOzQPK0a6PQp1DWz08lsfk+Oyp7s1056H8=",
+        "allowedIps": "10.6.0.29/32",
         "interfacePublicKey": "3CTcRIiXHORtMLdYJ0F1AqsQITiH6WEPXZxHjuMgqDY="
     }
+    
+Now you can connect wireguard client to your server. Example configuration:
 
-By default, rest2wg checks for disconnected peers every <ins>1 hour</ins> and removes all peers which handshake was more than <ins>600 seconds</ins> ago. To prevent this, set environment variable REST2WG_HANDSHAKE_AGO_LIMIT to 0 or specifie any value in seconds you want your server to delete peers after.
+    [Interface]
+    PrivateKey = YBth+re5L1qqO+O6kjB72RbZUZMmu8KxL0ppjyGyfmk=
+    Address = 10.6.0.29/32
+    DNS = 8.8.8.8
+
+    [Peer]
+    PublicKey = 3CTcRIiXHORtMLdYJ0F1AqsQITiH6WEPXZxHjuMgqDY=
+    AllowedIPs = 0.0.0.0/0
+    Endpoint = YOUR.SERVER.IP.ADDRESS:51850
+#### If you want to use authorization
+You need to leave REST2WG_ALLOW_NOAUTH unset (false is the default value). Then generate the key and its hash. You can [open this url](https://dotnetfiddle.net/ldbnVB), click 'Run' and copy generated key-hash pair or run [this code](ApiKeyGenerator/Program.cs) on your machine locally. You will get the next output:
+
+    Key base64 (for client):
+    zXCzMDwZt/bMTrT+rt08cH6XH+ut61LJRKEa+OLRJEMgegUv4HLxp9sB1+FnKJYkImn7Sh64eDRs1PtwV5ptmQ==
+
+    Key hash base64 (for server):
+    EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
+    
+The first value is the key itself, base64 encoded. You will need to pass it with your requests Authorization header in the next format:
+
+    Authorization: Basic zXCzMDwZt/bMTrT+rt08cH6XH+ut61LJRKEa+OLRJEMgegUv4HLxp9sB1+FnKJYkImn7Sh64eDRs1PtwV5ptmQ==
+    
+The second value is the key hash, base64 encoded. You will need to pass it to your docker container with the enviroment variable (if you want to pass it using docker secrets - read the full reference below):
+
+    --env REST2WG_AUTH_KEYHASH_BASE64=EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
+   
+Be aware, the data is not encrypted here, just encoded. There is no actual danger if you want to use this server for personal purposes, becouse you are transfering only public wireguard keys, exposing of which to anyone is not dangerous. But it opens ability for hacker to steal your key and make a DoS attack or just use your server too, so if you are using this server like a node in a big commerical VPN-service, you need to cover this server with NGINX or any other proxy which will manage TLS certificate to encrypt the authorization header.
