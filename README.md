@@ -8,7 +8,7 @@
 <br/>
 
 ## Quick start:
-    docker run --cap-add NET_ADMIN -p 51850:51820/udp -p 51851:51821/tcp --env REST2WG_ALLOW_NOAUTH=true --env REST2WG_HANDSHAKE_AGO_LIMIT=0 luminodiode/rest2wireguard
+    docker run --cap-add NET_ADMIN -p 51850:51820/udp -p 51851:51821/tcp --env REST2WG_ALLOW_NOAUTH=true luminodiode/rest2wireguard
 You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS encryption without authorization request header required. You can also expose 51822 port if you want to make requests without TLS encryption. Dont forget to allow ports in your UFW if there is one:
 
     ufw allow 51850/udp && ufw allow 51851/tcp
