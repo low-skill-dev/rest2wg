@@ -1,14 +1,15 @@
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-%230D597F.svg?style=for-the-badge&logo=alpine-linux&logoColor=white) 
 ![Wireguard](https://img.shields.io/badge/wireguard-%2388171A.svg?style=for-the-badge&logo=wireguard&logoColor=white)
+![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
 # rest2wireguard
-### REST2WG is an Alpine-based WebAPI-managed Wireguard server.
+### REST2WG is an Alpine-based TLS-secured WebAPI-managed Wireguard server.
 <br/>
 
 ## Quick start:
-    docker run --cap-add NET_ADMIN -p 51850:51820/udp -p 51851:5000/tcp --env REST2WG_ALLOW_NOAUTH=true --env REST2WG_HANDSHAKE_AGO_LIMIT=0 luminodiode/rest2wireguard
-You will get the image listening 51850 by Wireguard and 51851 by WebAPI without authorization request header required. Dont forget to allow it in your UFW if there is some:
+    docker run --cap-add NET_ADMIN -p 51850:51820/udp -p 51851:51821/tcp --env REST2WG_ALLOW_NOAUTH=true --env REST2WG_HANDSHAKE_AGO_LIMIT=0 luminodiode/rest2wireguard
+You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS encryption without authorization request header required. You can also expose 51822 port if you want to make requests without TLS encryption. Dont forget to allow ports in your UFW if there is one:
 
     ufw allow 51850/udp && ufw allow 51851/tcp
     
@@ -60,4 +61,4 @@ The second value is the key hash, base64 encoded. You will need to pass it to yo
 
     --env REST2WG_AUTH_KEYHASH_BASE64=EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
    
-Be aware, the data is not encrypted here, just encoded. There is no actual danger if you want to use this server for personal purposes, becouse you are transfering only public wireguard keys, exposing of which to anyone is not dangerous. But it opens ability for hacker to steal your key and make a DoS attack or just use your server too, so if you are using this server like a node in a big commerical VPN-service, you need to cover this server with NGINX or any other proxy which will manage TLS certificate to encrypt the authorization header.
+Be aware, the data is not encrypted here, just encoded. If you are using auth you should pass your requests to the 51821 port only, using TLS.
