@@ -13,12 +13,17 @@ RUN apk add -q --no-progress nginx
 RUN apk add -q --no-progress openssl
 RUN apk add -q --no-progress wireguard-tools
 RUN apk add -q --no-progress aspnetcore7-runtime
+#RUN /bin/sh -c "echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories"
+#RUN apk add -q --no-progress envsubst 
 
 COPY ./build_alpine/pre-setup.sh ./etc/rest2wg/pre-setup.sh
 COPY ./build_alpine/pre-wg0.conf ./etc/rest2wg/pre-wg0.conf
+COPY ./build_alpine/pre-nginx-limit_req.conf.template ./etc/rest2wg/pre-nginx-limit_req.conf.template
 COPY ./build_alpine/pre-nginx.conf/ ./etc/nginx/nginx.conf
 COPY ./build_alpine/pre-ssl-params.conf ./etc/nginx/snippets/ssl-params.conf
 COPY ./build_alpine/pre-self-signed.conf ./etc/nginx/snippets/self-signed.conf
 
+
 ENV ASPNETCORE_ENVIRONMENT=Production
-CMD ["sh", "-c", "umask 077 && chmod +x /etc/rest2wg/pre-setup.sh && /etc/rest2wg/pre-setup.sh"]
+ENV REST2WG_LIMIT_REQ=100000;
+CMD ["bash", "-c", "umask 077 && chmod +x /etc/rest2wg/pre-setup.sh && /etc/rest2wg/pre-setup.sh"]

@@ -15,15 +15,23 @@ public sealed class PeersController : ControllerBase
 {
 	private readonly ILogger<PeersController> _logger;
 	private readonly PeersBackgroundService _peersService;
-	public PeersController(PeersBackgroundService peersService, ILogger<PeersController> logger)
+	private readonly EnvironmentProvider _environment;
+	public PeersController(
+		PeersBackgroundService peersService, 
+		EnvironmentProvider environmentProvider, 
+		ILogger<PeersController> logger)
 	{
 		_logger = logger;
 		_peersService = peersService;
+		_environment = environmentProvider;
 	}
 
 	[HttpGet]
 	public async Task<IActionResult> GetPeersList()
 	{
+		if (_environment.DISABLE_GET_PEERS ?? false) 
+			return StatusCode(StatusCodes.Status405MethodNotAllowed);
+
 		return await Task.Run(()=>Ok(this.IncapsulateEnumerator(_peersService.GetPeersAndUpdateState())));
 	}
 
@@ -61,6 +69,9 @@ public sealed class PeersController : ControllerBase
 	[HttpDelete]
 	public async Task<IActionResult> DeletePeer([Required][FromBody] PeerActionRequest request)
 	{
+		if (_environment.DISABLE_DELETE_PEERS ?? false)
+			return StatusCode(StatusCodes.Status405MethodNotAllowed);
+
 		if (!this.ValidatePubkey(request.PublicKey))
 		{
 			_logger.LogWarning($"Invalid pubkey provided. Pubkey was: {request.PublicKey}.");

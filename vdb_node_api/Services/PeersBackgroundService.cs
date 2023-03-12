@@ -19,7 +19,6 @@ public sealed class PeersBackgroundService : BackgroundService
 	private readonly ILogger<PeersBackgroundService> _logger;
 
 	private DateTime _lastUpdateUtc;
-	private int _peersRemovedOnLastUpdate;
 
 	public string? InterfacePubkey { get; private set; }
 
@@ -51,9 +50,13 @@ public sealed class PeersBackgroundService : BackgroundService
 		return _ipService.DeletePeer(pubkey) && string.IsNullOrWhiteSpace(output);
 	}
 
+	private Stopwatch sw = new();
 	public async IAsyncEnumerator<WgShortPeerInfo> GetPeersAndUpdateState()
 	{
-		_peersRemovedOnLastUpdate = 0;
+		_logger.LogInformation($"Peers cleanup and sync started.");
+		sw.Restart();
+
+		var peersRemoved = 0;
 		var enumer = await WgCommandsExecutor.GetPeersListEnumerator();
 
 		var syncedDictionary = new Dictionary<string, int>();
@@ -66,7 +69,7 @@ public sealed class PeersBackgroundService : BackgroundService
 			{
 				_logger.LogInformation($"Peer {peer.PublicKey} removed because last " +
 					$"handshake occured more than {_settings.HandshakeAgoLimitSeconds} seconds ago.");
-				_peersRemovedOnLastUpdate++;
+				peersRemoved++;
 				await EnsurePeerRemoved(peer.PublicKey);
 			}
 			else
@@ -79,25 +82,30 @@ public sealed class PeersBackgroundService : BackgroundService
 		_ipService.SyncState(syncedDictionary);
 		_lastUpdateUtc = DateTime.UtcNow;
 		InterfacePubkey = WgCommandsExecutor.LastSeenInterfacePubkey;
+
+		sw.Stop();
+		_logger.LogInformation($"Peers cleanup completed: {peersRemoved} peers removed. " +
+			$"Took {sw.ElapsedMilliseconds / 1000} seconds.");
 		yield break;
 	}
 
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		Stopwatch sw = new();
+		if (_settings.PeersRenewIntervalSeconds <= 0)
+		{
+			_logger.LogInformation($"ExecuteAsync is disabled by settings.");
+			return;
+		}
+
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			// Данное условие проверяет, не был ли список обновлен форсированно.
 			if ((DateTime.UtcNow - _lastUpdateUtc).TotalSeconds > _settings.PeersRenewIntervalSeconds)
 			{
 				_logger.LogInformation($"Peers cleanup and sync started.");
-				sw.Restart();
 				var enumer = GetPeersAndUpdateState();
 				while (await enumer.MoveNextAsync()) ;
-				sw.Stop();
-				_logger.LogInformation($"Peers cleanup completed: {_peersRemovedOnLastUpdate} peers removed. " +
-					$"Took {sw.ElapsedMilliseconds / 1000} seconds.");
 			}
 
 			/* Данное мат. выражение задает вычисляет, сколько мс назад

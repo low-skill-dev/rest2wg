@@ -44,7 +44,7 @@ public static class WgCommandsExecutor
 	private static string GetWgShowCommand(string wgInterfaceName = null!)
 	{
 		return wgInterfaceName is null ?
-			"show" : $"wg show {wgInterfaceName}";
+			"show" : $"show {wgInterfaceName}";
 	}
 
 	public static async Task<string> AddPeer(string pubKey, string allowedIps)

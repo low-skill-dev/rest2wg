@@ -6,11 +6,14 @@ public sealed class EnvironmentProvider
 	private const string ENV_AUTH_KEYHASH = "REST2WG_AUTH_KEYHASH_BASE64";
 	private const string ENV_HANDSHAKE_AGO_LIMIT = "REST2WG_HANDSHAKE_AGO_LIMIT";
 	private const string ENV_REVIEW_INTERVAL = "REST2WG_REVIEW_INTERVAL";
-
+	private const string ENV_DISABLE_GET_PEERS = "REST2WG_DISABLE_GET_PEERS";
+	private const string ENV_DISABLE_DELETE_PEERS = "REST2WG_DISABLE_DELETE_PEERS";
 	public bool? ALLOW_NOAUTH { get; init; } = null;
 	public string? AUTH_KEYHASH { get; init; } = null;
 	public int? HANDSHAKE_AGO_LIMIT { get; init; } = null;
 	public int? REVIEW_INTERVAL { get; init; } = null;
+	public bool? DISABLE_GET_PEERS { get; init; } = null;
+	public bool? DISABLE_DELETE_PEERS { get; init; } = null;
 
 	private readonly ILogger<EnvironmentProvider> _logger;
 
@@ -23,11 +26,13 @@ public sealed class EnvironmentProvider
 			s => s.Length < 1024 && Convert.TryFromBase64String(s, new byte[1024], out _))!;
 		HANDSHAKE_AGO_LIMIT = ParseIntValue(ENV_HANDSHAKE_AGO_LIMIT, 0);
 		REVIEW_INTERVAL = ParseIntValue(ENV_REVIEW_INTERVAL, 0);
+		DISABLE_GET_PEERS = ParseBoolValue(ENV_DISABLE_GET_PEERS);
+		DISABLE_DELETE_PEERS = ParseBoolValue(ENV_DISABLE_DELETE_PEERS);
 	}
 
 	private string GetIncorrectIgnoredMessage(string EnvName)
 	{
-		return $"Incorrect valued of {ENV_REVIEW_INTERVAL} environment variable value was ignored.";
+		return $"Incorrect value of {ENV_REVIEW_INTERVAL} environment variable was ignored.";
 	}
 
 	private bool? ParseBoolValue(string EnvName)

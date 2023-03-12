@@ -2,8 +2,8 @@
 
 public class PeersBackgroundServiceSettings
 {
-	public int PeersRenewIntervalSeconds { get; set; } = 3600;
-	public int HandshakeAgoLimitSeconds { get; set; } = 600;
+	public int PeersRenewIntervalSeconds { get; set; } = 0;
+	public int HandshakeAgoLimitSeconds { get; set; } = 0;
 
 	public PeersBackgroundServiceSettings(int peersRenewIntervalSeconds, int handshakeAgoLimitSeconds)
 	{
