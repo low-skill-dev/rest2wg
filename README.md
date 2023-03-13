@@ -65,7 +65,7 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
 
 ## Full list of environment variables
 - ### NGINX
-    - **REST2WG_LIMIT_REQ** - limit requests per second for every address (0.1 = 6 requests per minute).
+    - **REST2WG_LIMIT_REQ** - limit requests per second for every address (0.1 = 6 requests per minute etc.).
         - Valid range: 0.001<VALUE<10^7. 
         - Default: 100000.
     - **REST2WG_ALLOWED_IP** - allow requests only from specified address. 
