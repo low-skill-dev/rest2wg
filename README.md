@@ -93,7 +93,7 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
         - Default: false.
 
 ## Using docker secrets
-The ASP-application loads */run/secrets/aspsecrets.json* file, which is default location for docker secrets. So if you want to use it, create file in the next format, where every directive is optional. Be aware, environmental veriables are being added to the arrays (e.g. MasterAccounts), otherwise it will override the *aspsecrets* values.
+The ASP-application loads */run/secrets/aspsecrets.json* file, which is default location for docker secrets. So if you want to use it, create file in the next format, where every directive is optional. Be aware, environmental variables are being added to the arrays (e.g. MasterAccounts), otherwise it will override the *aspsecrets* values.
 
     {
         "Logging": {
