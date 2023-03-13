@@ -20,10 +20,10 @@ COPY ./build_alpine/pre-setup.sh ./etc/rest2wg/pre-setup.sh
 COPY ./build_alpine/pre-wg0.conf ./etc/rest2wg/pre-wg0.conf
 COPY ./build_alpine/pre-nginx-limit_req.conf.template ./etc/rest2wg/pre-nginx-limit_req.conf.template
 COPY ./build_alpine/pre-nginx.conf/ ./etc/nginx/nginx.conf
-COPY ./build_alpine/pre-ssl-params.conf ./etc/nginx/snippets/ssl-params.conf
-COPY ./build_alpine/pre-self-signed.conf ./etc/nginx/snippets/self-signed.conf
+COPY ./build_alpine/pre-nginx-ssl-params.conf ./etc/nginx/snippets/ssl-params.conf
+COPY ./build_alpine/pre-nginx-self-signed.conf ./etc/nginx/snippets/self-signed.conf
 
 
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV REST2WG_LIMIT_REQ=100000;
+ENV REST2WG_LIMIT_REQ=100000
 CMD ["bash", "-c", "umask 077 && chmod +x /etc/rest2wg/pre-setup.sh && /etc/rest2wg/pre-setup.sh"]
