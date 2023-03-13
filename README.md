@@ -84,10 +84,53 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
     - **REST2WG_REVIEW_INTERVAL** - interval of peers review and removing outdated.
         - Valid range: 0<VALUE<2^31
         - Default: 0.
-        - Special value: 0 - review is never performed.
+        - Special value: 0 - review is never performed automatically.
     - **REST2WG_DISABLE_GET_PEERS** - disables GET:api/peers endpoint, returning 503 response.
         - Valid range: true/false.
         - Default: false.
     - **REST2WG_DISABLE_DELETE_PEERS** - disables DELETE:api/peers endpoint, returning 503 response.
         - Valid range: true/false.
         - Default: false.
+
+## Using docker secrets
+The ASP-application loads */run/secrets/aspsecrets.json* file, which is default location for docker secrets. So if you want to use it, create file in the next format, where every directive is optional. Be aware, environmental veriables are being added to the arrays (e.g. MasterAccounts), otherwise it will override the *aspsecrets* values.
+
+    {
+        "Logging": {
+            "LogLevel": {
+                "Default": "Information",
+                "Microsoft.AspNetCore": "Information"
+            }
+        },
+        "MasterAccounts": [
+            {
+                "KeyHashBase64": "vklVGRgH4LFwwTs1coxGwErshhzxqy6l8uIewY6/345k1RT1C1mwwe6p8btbw0iowWxwNkjbLINh4skdRO2lxA=="
+            }
+        ],
+        "PeersBackgroundServiceSettings": {
+            "PeersRenewIntervalSeconds": 0,
+            "HandshakeAgoLimitSeconds": 300
+        }
+    }
+Then put your json with the compose file, configured the next way:
+
+    version: '3.4'
+
+    services:
+      rest2wg_1:
+        restart: always
+        image: luminodiode/rest2wireguard:0.0.63a
+        cap_add:
+          - NET_ADMIN
+        ports:
+          - "51850:51820/udp"
+          - "51851:51821/tcp"
+        secrets:
+          - source: backSecs
+            target: aspsecrets.json
+            
+    secrets:
+      backSecs:
+        file: ./yourAspSecretsFile.json
+        
+        
