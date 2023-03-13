@@ -131,5 +131,3 @@ Then put your json with the compose file, configured the next way:
     secrets:
       backSecs:
         file: ./yourAspSecretsFile.json
-        
-        
