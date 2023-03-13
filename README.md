@@ -118,8 +118,7 @@ Then put your json with the compose file, configured the next way:
 
     services:
       rest2wg_1:
-        restart: always
-        image: luminodiode/rest2wireguard:0.0.63a
+        image: luminodiode/rest2wireguard
         cap_add:
           - NET_ADMIN
         ports:
