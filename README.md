@@ -62,3 +62,32 @@ The second value is the key hash, base64 encoded. You will need to pass it to yo
     --env REST2WG_AUTH_KEYHASH_BASE64=EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
    
 Be aware, the data is not encrypted here, just encoded. If you are using auth you should pass your requests to the 51821 port only, using TLS.
+
+## Full list of environment variables
+- ### NGINX
+    - **REST2WG_LIMIT_REQ** - limit requests per second for every address (0.1 = 6 requests per minute).
+        - Valid range: 0.001<VALUE<10^7. 
+        - Default: 100000.
+    - **REST2WG_ALLOWED_IP** - allow requests only from specified address. 
+        - Valid range: any IP-address. 
+        - Default: *all*.
+- ### ASP WebAPI
+    - **REST2WG_ALLOW_NOAUTH** - disable authorization header validation.
+        - Valid range: true/false.
+        - Default: false.
+    - **REST2WG_AUTH_KEYHASH_BASE64** - add specified key hash to the collection provided by aspsecrets.json.
+        - Valid range: any base64-encoded string.
+        - Default: null.
+    - **REST2WG_HANDSHAKE_AGO_LIMIT** - peer is removed on review if latest handshake occured more than VALUE seconds ago.
+        - Valid range: 0<VALUE<2^31
+        - Default: 2^31.
+    - **REST2WG_REVIEW_INTERVAL** - interval of peers review and removing outdated.
+        - Valid range: 0<VALUE<2^31
+        - Default: 0.
+        - Special value: 0 - review is never performed.
+    - **REST2WG_DISABLE_GET_PEERS** - disables GET:api/peers endpoint, returning 503 response.
+        - Valid range: true/false.
+        - Default: false.
+    - **REST2WG_DISABLE_DELETE_PEERS** - disables DELETE:api/peers endpoint, returning 503 response.
+        - Valid range: true/false.
+        - Default: false.
