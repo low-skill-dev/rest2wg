@@ -32,7 +32,7 @@ public sealed class EnvironmentProvider
 
 	private string GetIncorrectIgnoredMessage(string EnvName)
 	{
-		return $"Incorrect value of {ENV_REVIEW_INTERVAL} environment variable was ignored.";
+		return $"Incorrect value of {EnvName} environment variable was ignored.";
 	}
 
 	private bool? ParseBoolValue(string EnvName)
