@@ -66,29 +66,29 @@ public sealed class PeersController : ControllerBase
 		}
 	}
 
-	[HttpDelete]
-	public async Task<IActionResult> DeletePeer([Required][FromQuery] string pubkey)
+	[HttpPatch]
+	public async Task<IActionResult> DeletePeer([Required][FromBody] PeerActionRequest request)
 	{
 		if (_environment.DISABLE_DELETE_PEERS ?? false)
 			return StatusCode(StatusCodes.Status405MethodNotAllowed);
 
-		if (!this.ValidatePubkey(pubkey))
+		if (!this.ValidatePubkey(request.PublicKey))
 		{
-			_logger.LogWarning($"Invalid pubkey provided. Pubkey was: {pubkey}.");
+			_logger.LogWarning($"Invalid pubkey provided. Pubkey was: {request.PublicKey}.");
 			return BadRequest("Pubkey format is invalid.");
 		}
 
 		try
 		{
-			bool removed = await _peersService.EnsurePeerRemoved(pubkey);
+			bool removed = await _peersService.EnsurePeerRemoved(request.PublicKey);
 
-			_logger.LogInformation(removed ? $"Successfully removed peer {pubkey}."
-				: $"Peer requested for deletion is not found. Pubkey was: {pubkey}.");
+			_logger.LogInformation(removed ? $"Successfully removed peer {request.PublicKey}."
+				: $"Peer requested for deletion is not found. Pubkey was: {request.PublicKey}.");
 			return removed ? Ok() : NotFound();
 		}
 		catch (Exception ex)
 		{
-			_logger.LogWarning($"Could not delete peer: {ex.Message}. Pubkey was: {pubkey}.");
+			_logger.LogWarning($"Could not delete peer: {ex.Message}. Pubkey was: {request.PublicKey}.");
 			return Problem(
 #if DEBUG
 				ex.Message,

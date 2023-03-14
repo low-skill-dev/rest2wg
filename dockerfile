@@ -1,6 +1,6 @@
 FROM alpine:3 AS base
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 COPY ./vdb_node_api /vdb_node_api
 COPY ./vdb_node_wireguard_manipulator /vdb_node_wireguard_manipulator
 RUN dotnet publish /vdb_node_api/vdb_node_api.csproj -c "Release" -r linux-musl-x64 --no-self-contained -o /app/publish
