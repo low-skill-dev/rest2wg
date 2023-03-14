@@ -67,8 +67,7 @@ public sealed class PeersController : ControllerBase
 	}
 
 	[HttpDelete]
-	[Route("{pubkey}")]
-	public async Task<IActionResult> DeletePeer([Required][FromRoute] string pubkey)
+	public async Task<IActionResult> DeletePeer([Required][FromQuery] string pubkey)
 	{
 		if (_environment.DISABLE_DELETE_PEERS ?? false)
 			return StatusCode(StatusCodes.Status405MethodNotAllowed);
