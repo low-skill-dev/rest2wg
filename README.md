@@ -88,7 +88,7 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
     - **REST2WG_DISABLE_GET_PEERS** - disables GET:api/peers endpoint, returning 503 response.
         - Valid range: true/false.
         - Default: false.
-    - **REST2WG_DISABLE_DELETE_PEERS** - disables DELETE:api/peers endpoint, returning 503 response.
+    - **REST2WG_DISABLE_DELETE_PEERS** - disables PATCH:api/peers endpoint, returning 503 response.
         - Valid range: true/false.
         - Default: false.
 
