@@ -16,9 +16,9 @@ You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS
 Now you can access next endpoints:
 - **GET /api/peers** - get list of all peers
 - **PUT /api/peers** - add new peer
-- **DELETE /api/peers/?pubkey={pubkey:string}** - remove existing peer
+- **PATCH /api/peers** - remove existing peer
 
-Where for PUT and DELETE endpoints you must provide application/json body in the next format:
+Where for PUT and PATCH endpoints you must provide application/json body in the next format:
 
     {
         "publicKey":"LwkXubXSXLOzQPK0a6PQp1DWz08lsfk+Oyp7s1056H8="
@@ -88,7 +88,7 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
     - **REST2WG_DISABLE_GET_PEERS** - disables GET:api/peers endpoint, returning 503 response.
         - Valid range: true/false.
         - Default: false.
-    - **REST2WG_DISABLE_DELETE_PEERS** - disables DELETE:api/peers endpoint, returning 503 response.
+    - **REST2WG_DISABLE_DELETE_PEERS** - disables PATCH:api/peers endpoint, returning 503 response.
         - Valid range: true/false.
         - Default: false.
 
