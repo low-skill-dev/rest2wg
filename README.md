@@ -16,7 +16,7 @@ You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS
 Now you can access next endpoints:
 - **GET /api/peers** - get list of all peers
 - **PUT /api/peers** - add new peer
-- **DELETE /api/peers** - remove existing peer
+- **DELETE /api/peers/{pubkey:string}** - remove existing peer
 
 Where for PUT and DELETE endpoints you must provide application/json body in the next format:
 
