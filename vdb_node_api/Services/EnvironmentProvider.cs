@@ -8,12 +8,14 @@ public sealed class EnvironmentProvider
 	private const string ENV_REVIEW_INTERVAL = "REST2WG_REVIEW_INTERVAL";
 	private const string ENV_DISABLE_GET_PEERS = "REST2WG_DISABLE_GET_PEERS";
 	private const string ENV_DISABLE_DELETE_PEERS = "REST2WG_DISABLE_DELETE_PEERS";
+	private const string ENV_DISABLE_STATUS_HMAC = "REST2WG_DISABLE_STATUS_HMAC";
 	public bool? ALLOW_NOAUTH { get; init; } = null;
 	public string? AUTH_KEYHASH { get; init; } = null;
 	public int? HANDSHAKE_AGO_LIMIT { get; init; } = null;
 	public int? REVIEW_INTERVAL { get; init; } = null;
 	public bool? DISABLE_GET_PEERS { get; init; } = null;
 	public bool? DISABLE_DELETE_PEERS { get; init; } = null;
+	public bool? DISABLE_STATUS_HMAC { get; init; } = null;
 
 	private readonly ILogger<EnvironmentProvider> _logger;
 
@@ -28,6 +30,7 @@ public sealed class EnvironmentProvider
 		REVIEW_INTERVAL = ParseIntValue(ENV_REVIEW_INTERVAL, 0);
 		DISABLE_GET_PEERS = ParseBoolValue(ENV_DISABLE_GET_PEERS);
 		DISABLE_DELETE_PEERS = ParseBoolValue(ENV_DISABLE_DELETE_PEERS);
+		DISABLE_STATUS_HMAC = ParseBoolValue(ENV_DISABLE_STATUS_HMAC);
 	}
 
 	private string GetIncorrectIgnoredMessage(string EnvName)

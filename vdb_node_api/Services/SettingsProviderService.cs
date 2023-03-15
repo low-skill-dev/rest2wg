@@ -53,6 +53,9 @@ public class SettingsProviderService
 		}
 	}
 
+	public virtual SecretSigningKey? SecretSigningKey
+		=> _configuration.GetSection(nameof(SecretSigningKey)).Get<SecretSigningKey>() ?? null;
+
 
 	public SettingsProviderService(IConfiguration configuration, EnvironmentProvider environmentProvider)
 	{
