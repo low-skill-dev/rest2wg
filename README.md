@@ -63,7 +63,9 @@ The second value is the key hash, base64 encoded. You will need to pass it to yo
     --env REST2WG_AUTH_KEYHASH_BASE64=EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
    
 Be aware, the data is not encrypted here, just encoded. If you are using auth you should pass your requests to the 51821 port only, using TLS.
-**Becouse we are using self-signed certificate**, we need to verify the server. For this purpose **GET /api/status** may return Authorization header HmacSha512 if auth is enabled and the "SecretSigningKey" was provided in aspsecrets.json (see the format below).
+**Becouse we are using self-signed certificate**, we need to verify the server. For this purpose **GET /api/status** may return Authorization header HmacSha512 if auth is enabled and the "SecretSigningKey" was provided in aspsecrets.json (see the format below). In this case response body will be:
+
+    { "authKeyHmacSha512Base64": "6CzINt2nQqR1/xV5hjOj48b3NAxt0LjzJ4qlzc0IfZifuTK5sbvAoN1ExQXz3RZsBHRquc6cSs6vKkM1ud8N7Q==" }
 
 ## Full list of environment variables
 - ### NGINX
