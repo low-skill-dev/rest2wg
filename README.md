@@ -14,6 +14,7 @@ You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS
     ufw allow 51850/udp && ufw allow 51851/tcp
     
 Now you can access next endpoints:
+- **GET /api/status** - always returns 200_OK if auth is disabled. May return Authorization header HMAC otherwise.
 - **GET /api/peers** - get list of all peers
 - **PUT /api/peers** - add new peer
 - **PATCH /api/peers** - remove existing peer
@@ -62,6 +63,7 @@ The second value is the key hash, base64 encoded. You will need to pass it to yo
     --env REST2WG_AUTH_KEYHASH_BASE64=EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
    
 Be aware, the data is not encrypted here, just encoded. If you are using auth you should pass your requests to the 51821 port only, using TLS.
+**Becouse we are using self-signed certificate**, we need to verify the server. For this purpose **GET /api/status** may return Authorization header HmacSha512 if auth is enabled and the "SecretSigningKey" was provided in aspsecrets.json (see the format below).
 
 ## Full list of environment variables
 - ### NGINX
@@ -91,6 +93,9 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
     - **REST2WG_DISABLE_DELETE_PEERS** - disables PATCH:api/peers endpoint, returning 503 response.
         - Valid range: true/false.
         - Default: false.
+    - **REST2WG_DISABLE_STATUS_HMAC** - disables returning Authorization header key HmacSha512 on GET /api/status endpoint.
+        - Valid range: true/false.
+        - Default: false.
 
 ## Using docker secrets
 The ASP-application loads */run/secrets/aspsecrets.json* file, which is default location for docker secrets. So if you want to use it, create file in the next format, where every directive is optional. Be aware, environmental variables are being added to the arrays (e.g. MasterAccounts), otherwise it will override the *aspsecrets* values.
@@ -110,7 +115,10 @@ The ASP-application loads */run/secrets/aspsecrets.json* file, which is default 
         "PeersBackgroundServiceSettings": {
             "PeersRenewIntervalSeconds": 0,
             "HandshakeAgoLimitSeconds": 300
-        }
+        },
+        "SecretSigningKey": {
+		    "KeyBase64": "vklVGRgH4LFwwTs1coxGwErshhzxqy6l8uIewY6/345k1RT1C1mwwe6p8btbw0iowWxwNkjbLINh4skdRO2lxA=="
+	    }
     }
 Then put your json with the compose file, configured the next way:
 
