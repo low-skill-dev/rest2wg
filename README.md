@@ -14,7 +14,7 @@ You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS
     ufw allow 51850/udp && ufw allow 51851/tcp
     
 Now you can access next endpoints:
-- **GET /api/status** - always returns 200_OK if auth is disabled. May return Authorization header HMAC otherwise.
+- **GET /api/status** - always returns 200_OK (if not 401). May return Authorization header HMAC in body.
 - **GET /api/peers** - get list of all peers
 - **PUT /api/peers** - add new peer
 - **PATCH /api/peers** - remove existing peer
