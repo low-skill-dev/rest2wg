@@ -117,8 +117,8 @@ The ASP-application loads */run/secrets/aspsecrets.json* file, which is default 
             "HandshakeAgoLimitSeconds": 300
         },
         "SecretSigningKey": {
-		    "KeyBase64": "vklVGRgH4LFwwTs1coxGwErshhzxqy6l8uIewY6/345k1RT1C1mwwe6p8btbw0iowWxwNkjbLINh4skdRO2lxA=="
-	    }
+	    "KeyBase64": "vklVGRgH4LFwwTs1coxGwErshhzxqy6l8uIewY6/345k1RT1C1mwwe6p8btbw0iowWxwNkjbLINh4skdRO2lxA=="
+	}
     }
 Then put your json with the compose file, configured the next way:
 
