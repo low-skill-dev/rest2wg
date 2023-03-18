@@ -23,9 +23,10 @@ if ! test -e "/etc/nginx/snippets/nginx-limit_req.conf"; then
     echo "${REST2WG_LIMIT_REQ}r/s;" >> /etc/nginx/snippets/nginx-limit_req.conf
 fi
 
-
-if !(ipcalc -n "${REST2WG_ALLOWED_IP}"); then
-    echo "Incorrect value of REST2WG_LIMIT_REQ environment variable was ignored."
+if (testvar='all' && [[ $REST2WG_ALLOWED_IP = $testvar ]]); then
+    unset testvar;
+elif !(ipcalc -n "${REST2WG_ALLOWED_IP}"); then
+    echo "Incorrect value of REST2WG_ALLOWED_IP environment variable was ignored."
     echo "REST2WG_ALLOWED_IP was set to ALL."
     REST2WG_ALLOWED_IP="all";
 fi
