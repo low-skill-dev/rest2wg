@@ -2,9 +2,10 @@
 [![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-%230D597F.svg?style=for-the-badge&logo=alpine-linux&logoColor=white)](https://www.alpinelinux.org)
 [![Wireguard](https://img.shields.io/badge/wireguard-%2388171A.svg?style=for-the-badge&logo=wireguard&logoColor=white)](https://www.wireguard.com)
 [![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org)
-[![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)](https://asp.net)
+[![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/en-us/apps/aspnet)
 # rest2wireguard
 ### Alpine-based TLS-securely WebAPI-managed Wireguard server.
+#### You can freely connect to the demo rest2wireguard container running on VPS in Frankfurt-am-Main with '--cpus=0.1' using [this release](https://github.com/LuminoDiode/rest2wg_demo/releases/tag/v0.0.2-beta).
 <br/>
 
 ## Quick start:
@@ -14,7 +15,7 @@ You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS
     ufw allow 51850/udp && ufw allow 51851/tcp
     
 Now you can access next endpoints:
-- **GET /api/status** - always returns 200_OK if auth is disabled. May return Authorization header HMAC otherwise.
+- **GET /api/status** - always returns 200_OK (if not 401). May return Authorization header HMAC in body.
 - **GET /api/peers** - get list of all peers
 - **PUT /api/peers** - add new peer
 - **PATCH /api/peers** - remove existing peer
@@ -63,7 +64,9 @@ The second value is the key hash, base64 encoded. You will need to pass it to yo
     --env REST2WG_AUTH_KEYHASH_BASE64=EbnejPeYabvB709y/3a/ubyUHqiCwjJqLWw0PE0AzSDTxHF+fXrKIagzSBKMF/2pwkrKk2KUhUNm6mhyUajFlA==
    
 Be aware, the data is not encrypted here, just encoded. If you are using auth you should pass your requests to the 51821 port only, using TLS.
-**Becouse we are using self-signed certificate**, we need to verify the server. For this purpose **GET /api/status** may return Authorization header HmacSha512 if auth is enabled and the "SecretSigningKey" was provided in aspsecrets.json (see the format below).
+**Becouse we are using self-signed certificate**, we need to verify the server. For this purpose **GET /api/status** may return Authorization header HmacSha512 if auth is enabled and the "SecretSigningKey" was provided in aspsecrets.json (see the format below). In this case response body will be:
+
+    { "authKeyHmacSha512Base64": "6CzINt2nQqR1/xV5hjOj48b3NAxt0LjzJ4qlzc0IfZifuTK5sbvAoN1ExQXz3RZsBHRquc6cSs6vKkM1ud8N7Q==" }
 
 ## Full list of environment variables
 - ### NGINX
