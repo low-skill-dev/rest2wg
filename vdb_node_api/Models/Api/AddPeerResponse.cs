@@ -2,14 +2,11 @@
 
 public class AddPeerResponse
 {
-    public string PeerPublicKey { get; set; }
-    public string AllowedIps { get; set; }
+    public string AllowedIps { get; init; }
+    public string InterfacePublicKey { get; init; }
 
-    public string? InterfacePublicKey { get; set; }
-
-    public AddPeerResponse(string peerPublicKey, string allowedIps, string? interfacePublicKey = null)
+    public AddPeerResponse(string allowedIps, string interfacePublicKey)
     {
-        PeerPublicKey = peerPublicKey;
         AllowedIps = allowedIps;
         InterfacePublicKey = interfacePublicKey;
     }

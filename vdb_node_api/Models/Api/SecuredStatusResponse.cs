@@ -2,7 +2,7 @@
 
 public class SecuredStatusResponse
 {
-	public string AuthKeyHmacSha512Base64 { get; set; }
+	public string AuthKeyHmacSha512Base64 { get; init; }
 
 	public SecuredStatusResponse(string authKeyHmacSha512Base64)
 	{

@@ -1,4 +1,6 @@
-﻿namespace vdb_node_api.Services;
+﻿using System.Collections.ObjectModel;
+
+namespace vdb_node_api.Services;
 
 /* Данный Singleton-сервис служит для нумерации IP-адресов клиентов.
  * Кажому серверу предлагается адресовать до нескольких млн клиентов,
@@ -61,8 +63,9 @@ public sealed class IpDedicationService
 
 	private Dictionary<string, int> _dedicatedAddresses;
 	private readonly HashSet<int> _usedAddresses;
-
+	
 	public int IpsAvailable => MaxClients - _usedAddresses.Count;
+	public ReadOnlyDictionary<string, int> DedicatedAddresses => _dedicatedAddresses.AsReadOnly();
 
 	public IpDedicationService()
 	{

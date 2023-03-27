@@ -34,6 +34,8 @@ public sealed class PeersBackgroundService : BackgroundService
 		_lastUpdateUtc = DateTime.MinValue;
 	}
 
+	public IEnumerable<string> GetPublicKeys() => _ipService.DedicatedAddresses.Keys;
+
 	public async Task<string> EnsurePeerAdded(string pubkey)
 	{
 		string ip = _ipService.EnsureDedicatedAddressForPeer(pubkey);

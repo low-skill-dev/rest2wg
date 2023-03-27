@@ -25,7 +25,7 @@ public sealed class EnvironmentProvider
 
 		ALLOW_NOAUTH = ParseBoolValue(ENV_ALLOW_NOAUTH);
 		AUTH_KEYHASH = ParseStringValue(ENV_AUTH_KEYHASH,
-			s => s.Length < 1024 && Convert.TryFromBase64String(s, new byte[1024], out _))!;
+			s => s.Length < 6000 && Convert.TryFromBase64String(s, new byte[s.Length*4/3+3], out _));
 		HANDSHAKE_AGO_LIMIT = ParseIntValue(ENV_HANDSHAKE_AGO_LIMIT, 0);
 		REVIEW_INTERVAL = ParseIntValue(ENV_REVIEW_INTERVAL, 0);
 		DISABLE_GET_PEERS = ParseBoolValue(ENV_DISABLE_GET_PEERS);

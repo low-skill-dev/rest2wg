@@ -2,7 +2,7 @@
 
 public class SecretSigningKey
 {
-	public string KeyBase64 { get; set; }
+	public string KeyBase64 { get; init; }
 
 	public SecretSigningKey(string keyBase64)
 	{
