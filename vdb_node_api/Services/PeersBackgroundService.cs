@@ -20,7 +20,7 @@ public sealed class PeersBackgroundService : BackgroundService
 
 	private DateTime _lastUpdateUtc;
 
-	public string? InterfacePubkey { get; private set; }
+	public string InterfacePubkey { get; private set; }=string.Empty;
 
 	public PeersBackgroundService(IpDedicationService ipService, SettingsProviderService settingsProvider, ILogger<PeersBackgroundService> logger)
 	{
@@ -59,6 +59,7 @@ public sealed class PeersBackgroundService : BackgroundService
 		sw.Restart();
 
 		var peersRemoved = 0;
+		var peersCount = 0;
 		var enumer = await WgCommandsExecutor.GetPeersListEnumerator();
 
 		var syncedDictionary = new Dictionary<string, int>();
@@ -66,6 +67,7 @@ public sealed class PeersBackgroundService : BackgroundService
 		while (enumer.MoveNext())
 		{
 			var peer = enumer.Current;
+			peersCount++;
 
 			if (peer.HandshakeSecondsAgo > _settings.HandshakeAgoLimitSeconds)
 			{
@@ -79,6 +81,7 @@ public sealed class PeersBackgroundService : BackgroundService
 				syncedDictionary.Add(peer.PublicKey, _ipService.StringToIndex(peer.AllowedIps));
 				yield return peer;
 			}
+
 		}
 
 		_ipService.SyncState(syncedDictionary);
@@ -86,7 +89,7 @@ public sealed class PeersBackgroundService : BackgroundService
 		InterfacePubkey = WgCommandsExecutor.LastSeenInterfacePubkey;
 
 		sw.Stop();
-		_logger.LogInformation($"Peers cleanup completed: {peersRemoved} peers removed. " +
+		_logger.LogInformation($"Peers cleanup completed: {peersRemoved} out of {peersCount} removed. " +
 			$"Took {sw.ElapsedMilliseconds / 1000} seconds.");
 		yield break;
 	}

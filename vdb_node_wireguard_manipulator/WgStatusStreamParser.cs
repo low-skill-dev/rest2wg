@@ -2,7 +2,7 @@
 
 internal class WgStatusStreamParser : WgStatusParser
 {
-	public static string? LastSeenInterfacePubkey = null;
+	public static string LastSeenInterfacePubkey = string.Empty;
 	public static IEnumerator<WgShortPeerInfo> ParsePeersFromStreamShortly(StreamReader output)
 	{
 		int currentPos;
