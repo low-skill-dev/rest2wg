@@ -27,14 +27,13 @@ public sealed class PeersController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<IActionResult> GetPeersList([FromQuery] bool noCleanup = false)
+	public async Task<IActionResult> GetPeersList([FromQuery] bool withCleanup = false)
 	{
 		if(_environment.DISABLE_GET_PEERS ?? false)
 			return StatusCode(StatusCodes.Status405MethodNotAllowed);
 
-		if(noCleanup) 
+		if(!withCleanup) 
 			return StatusCode(StatusCodes.Status200OK, _peersService.GetPublicKeys());
-
 
 		/* The task below may take extremely long time to complete. On 
 		 * a single-core vCPU it was 3 seconds for 15K peers. Consider 
