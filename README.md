@@ -16,7 +16,7 @@ You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS
     
 Now you can access next endpoints:
 - **GET /api/status** - always returns 200_OK (if not 401). May return Authorization header HMAC in body.
-- **GET /api/peers** - get list of all peers
+- **GET /api/peers[?withCleanup=false]** - get list of all peers [and remove outdated]
 - **PUT /api/peers** - add new peer
 - **PATCH /api/peers** - remove existing peer
 
@@ -30,7 +30,6 @@ Where for PUT and PATCH endpoints you must provide application/json body in the 
 And the response format for PUT endpoint will be:
 
     {
-        "peerPublicKey": "LwkXubXSXLOzQPK0a6PQp1DWz08lsfk+Oyp7s1056H8=",
         "allowedIps": "10.6.0.29/32",
         "interfacePublicKey": "3CTcRIiXHORtMLdYJ0F1AqsQITiH6WEPXZxHjuMgqDY="
     }
