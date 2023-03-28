@@ -4,7 +4,7 @@ namespace vdb_node_wireguard_manipulator;
 
 public static class WgCommandsExecutor
 {
-	public static string? LastSeenInterfacePubkey => WgStatusStreamParser.LastSeenInterfacePubkey;
+	public static string LastSeenInterfacePubkey => WgStatusStreamParser.LastSeenInterfacePubkey;
 
 	private static async Task<string> RunCommand(string command, string fileName = @"wg")
 	{

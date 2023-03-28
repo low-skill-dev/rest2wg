@@ -27,19 +27,27 @@ public sealed class PeersController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<IActionResult> GetPeersList([FromQuery] bool keysOnly = false)
+	public async Task<IActionResult> GetPeersList([FromQuery] bool noCleanup = false)
 	{
 		if(_environment.DISABLE_GET_PEERS ?? false)
 			return StatusCode(StatusCodes.Status405MethodNotAllowed);
 
-		if(keysOnly) {
+		if(noCleanup) {
 			return StatusCode(StatusCodes.Status200OK, _peersService.GetPublicKeys());
 		} else {
-			/* This task may take extremely long time, so you should run it async only.
-			 * Consider being ready for timeout of any kind (i.e. 504 gateway timeout).
+			/* The task below may take extremely long time to complete. On 
+			 * a single-core vCPU it was 3 seconds for 15K peers. Consider 
+			 * being ready for timeout of any kind (i.e. gateway) 
+			 * and keep the timeoutTask enabled.
 			 */
-			return await Task.Run(() => StatusCode(StatusCodes.Status200OK, 
-				this.IncapsulateEnumerator(_peersService.GetPeersAndUpdateState())));
+			var peersTask = Task.Run(() => StatusCode(StatusCodes.Status200OK,
+					this.IncapsulateEnumerator(_peersService.GetPeersAndUpdateState())
+					.ToBlockingEnumerable().ToArray()));
+			var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
+
+			await Task.WhenAny(peersTask, timeoutTask);
+			return peersTask.IsCompletedSuccessfully
+				? peersTask.Result : StatusCode(StatusCodes.Status202Accepted);
 		}
 	}
 
