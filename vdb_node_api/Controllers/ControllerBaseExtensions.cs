@@ -11,7 +11,7 @@ public static class ControllerBaseExtensions
 	{
 		return !string.IsNullOrWhiteSpace(pk)
 			&& pk.Length <= (strictBytesCount * 4 / 3 + 3)
-			&& Convert.TryFromBase64String(pk, new byte[256/8], out var bytesCount)
+			&& Convert.TryFromBase64String(pk, new byte[strictBytesCount], out var bytesCount)
 			&& (strictBytesCount == -1 || bytesCount == strictBytesCount);
 	}
 

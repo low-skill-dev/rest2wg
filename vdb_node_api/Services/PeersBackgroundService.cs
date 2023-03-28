@@ -71,7 +71,7 @@ public sealed class PeersBackgroundService : BackgroundService
 
 			if (peer.HandshakeSecondsAgo > _settings.HandshakeAgoLimitSeconds)
 			{
-				_logger.LogInformation($"Peer {peer.PublicKey} removed because last " +
+				_logger.LogDebug($"Peer {peer.PublicKey} removed because last " +
 					$"handshake occured more than {_settings.HandshakeAgoLimitSeconds} seconds ago.");
 				peersRemoved++;
 				await EnsurePeerRemoved(peer.PublicKey);

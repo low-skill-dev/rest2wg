@@ -18,11 +18,17 @@ public sealed class StatusController : ControllerBase
 	private readonly bool _allowNoAuth;
 	private readonly bool _disableHmac;
 	private string? _keyForHmac512;
-	public StatusController(SettingsProviderService settingsProviderService, EnvironmentProvider environmentProvider)
+	private readonly ILogger<StatusController> _logger;
+	public StatusController(
+		SettingsProviderService settingsProviderService, 
+		EnvironmentProvider environmentProvider, 
+		ILogger<StatusController> logger)
 	{
 		_allowNoAuth = environmentProvider.ALLOW_NOAUTH ?? false;
 		_disableHmac = environmentProvider.DISABLE_STATUS_HMAC ?? false;
 		_keyForHmac512 = settingsProviderService.SecretSigningKey?.KeyBase64;
+
+		_logger = logger;
 	}
 
 	[HttpGet]
@@ -35,6 +41,8 @@ public sealed class StatusController : ControllerBase
 			} catch {
 				// this will disable HMAC'ing if there is no way to perform it
 				_keyForHmac512 = null;
+				_logger.LogError("Invalid base64-encoded key provided for GET:/api/status " +
+					"endpoint HMAC'ing is ignored now on.");
 				return GetStatus();
 			}
 

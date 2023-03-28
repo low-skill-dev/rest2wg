@@ -32,23 +32,23 @@ public sealed class PeersController : ControllerBase
 		if(_environment.DISABLE_GET_PEERS ?? false)
 			return StatusCode(StatusCodes.Status405MethodNotAllowed);
 
-		if(noCleanup) {
+		if(noCleanup) 
 			return StatusCode(StatusCodes.Status200OK, _peersService.GetPublicKeys());
-		} else {
-			/* The task below may take extremely long time to complete. On 
-			 * a single-core vCPU it was 3 seconds for 15K peers. Consider 
-			 * being ready for timeout of any kind (i.e. gateway) 
-			 * and keep the timeoutTask enabled.
-			 */
-			var peersTask = Task.Run(() => StatusCode(StatusCodes.Status200OK,
-					this.IncapsulateEnumerator(_peersService.GetPeersAndUpdateState())
-					.ToBlockingEnumerable().ToArray()));
-			var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
 
-			await Task.WhenAny(peersTask, timeoutTask);
-			return peersTask.IsCompletedSuccessfully
-				? peersTask.Result : StatusCode(StatusCodes.Status202Accepted);
-		}
+
+		/* The task below may take extremely long time to complete. On 
+		 * a single-core vCPU it was 3 seconds for 15K peers. Consider 
+		 * being ready for timeout of any kind (i.e. gateway) 
+		 * and keep the timeoutTask enabled.
+		 */
+		var peersTask = Task.Run(() => StatusCode(StatusCodes.Status200OK,
+				this.IncapsulateEnumerator(_peersService.GetPeersAndUpdateState())
+				.ToBlockingEnumerable().ToArray()));
+		var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
+
+		await Task.WhenAny(peersTask, timeoutTask);
+		return peersTask.IsCompletedSuccessfully ? peersTask.Result 
+			: StatusCode(StatusCodes.Status202Accepted);
 	}
 
 	[HttpPut]
@@ -64,7 +64,7 @@ public sealed class PeersController : ControllerBase
 			_logger.LogInformation($"Successfully added new peer on \'{ip}\': \'{request.PublicKey}\'.");
 			return StatusCode(StatusCodes.Status200OK, request.CreateResponse(ip, _peersService.InterfacePubkey));
 		} catch(Exception ex) {
-			_logger.LogWarning($"Could not add new peer: \'{ex.Message}\'. Pubkey was: \'{request.PublicKey}\'.");
+			_logger.LogError($"Could not add new peer: \'{ex.Message}\'. Pubkey was: \'{request.PublicKey}\'.");
 			try {
 				// no need to catch
 				await _peersService.EnsurePeerRemoved(request.PublicKey);
@@ -95,7 +95,7 @@ public sealed class PeersController : ControllerBase
 				return StatusCode(StatusCodes.Status404NotFound);
 			}
 		} catch(Exception ex) {
-			_logger.LogWarning($"Could not delete peer: \'{ex.Message}\'. Pubkey was: \'{request.PublicKey}\'.");
+			_logger.LogError($"Could not delete peer: \'{ex.Message}\'. Pubkey was: \'{request.PublicKey}\'.");
 			return StatusCode(StatusCodes.Status500InternalServerError);
 		}
 	}

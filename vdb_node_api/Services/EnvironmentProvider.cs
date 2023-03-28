@@ -53,7 +53,7 @@ public sealed class EnvironmentProvider
 				_logger.LogInformation($"{EnvName}={false}.");
 				return false;
 			}
-			_logger.LogWarning(GetIncorrectIgnoredMessage(EnvName));
+			_logger.LogError(GetIncorrectIgnoredMessage(EnvName));
 		}
 		_logger.LogInformation($"{EnvName} was not present.");
 		return null;
@@ -68,7 +68,7 @@ public sealed class EnvironmentProvider
 				_logger.LogInformation($"{EnvName}={val}.");
 				return val;
 			}
-			_logger.LogWarning(GetIncorrectIgnoredMessage(EnvName));
+			_logger.LogError(GetIncorrectIgnoredMessage(EnvName));
 		}
 		_logger.LogInformation($"{EnvName} was not present.");
 		return null;
@@ -84,7 +84,7 @@ public sealed class EnvironmentProvider
 				_logger.LogInformation($"{EnvName}={str}.");
 				return str;
 			}
-			_logger.LogWarning(GetIncorrectIgnoredMessage(EnvName));
+			_logger.LogError(GetIncorrectIgnoredMessage(EnvName));
 		}
 		_logger.LogInformation($"{EnvName} was not present.");
 		return null;
