@@ -42,6 +42,6 @@ nginx
 echo "Spinning up the Wireguard service..."
 wg-quick up wg0 && wg show wg0
 echo "Spinning up the ASP WebAPI..."
-dotnet /app/vdb_node_api.dll -no-launch-profile
+dotnet /app/vdb_node_api.dll --no-launch-profile
 
 tail -f /dev/null
