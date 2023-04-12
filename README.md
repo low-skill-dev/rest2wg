@@ -5,7 +5,7 @@
 [![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/en-us/apps/aspnet)
 # rest2wireguard
 ### Alpine-based TLS-securely WebAPI-managed Wireguard server.
-#### You can freely connect to the demo rest2wireguard container running on VPS in Frankfurt-am-Main with '--cpus=0.1' using [this release](https://github.com/LuminoDiode/rest2wg_demo/releases/tag/v0.0.2-beta).
+#### Useable for both personal and enterprise purposes. You can freely connect to the demo rest2wireguard container running on VPS in Frankfurt-am-Main with '--cpus=0.1' using [this release](https://github.com/LuminoDiode/rest2wg_demo/releases/tag/v0.0.2-beta).
 <br/>
 
 ## Quick start:
