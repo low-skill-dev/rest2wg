@@ -99,6 +99,11 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
         - Valid range: true/false.
         - Default: false.
 
+## Full list of listened ports
+- **51820/udp** - wireguard port.
+- **51821/tcp** - nginx-to-api HTTP2 self-signed TLS port.
+- **51822/tcp** - nginx-to-api no-TLS port.
+
 ## Using docker secrets
 The ASP-application loads */run/secrets/aspsecrets.json* file, which is default location for docker secrets. So if you want to use it, create file in the next format, where every directive is optional. Be aware, environmental variables are being added to the arrays (e.g. MasterAccounts), otherwise it will override the *aspsecrets* values.
 
