@@ -19,6 +19,7 @@ Now you can access next endpoints:
 - **GET /api/peers[?withCleanup=false]** - get list of all peers [and remove outdated]
 - **PUT /api/peers** - add new peer
 - **PATCH /api/peers** - remove existing peer
+- **DELETE /api/peers/{PubkeyBase64Url}** - do the same as above but without RFC 9110 violation.
 
 Where for PUT and PATCH endpoints you must provide application/json body in the next format:
 
