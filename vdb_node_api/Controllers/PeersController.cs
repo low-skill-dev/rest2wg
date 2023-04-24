@@ -98,5 +98,24 @@ public sealed class PeersController : ControllerBase
 			return StatusCode(StatusCodes.Status500InternalServerError);
 		}
 	}
+
+	[HttpDelete]
+	[Route("{pubkeyBase64Url}")]
+	public async Task<IActionResult> DeletePeerRFC9110([Required][FromRoute] string pubkeyBase64Url)
+	{
+		if(_environment.DISABLE_DELETE_PEERS ?? false)
+			return StatusCode(StatusCodes.Status405MethodNotAllowed);
+
+		if(!this.ValidatePubkeyWithoutDecoding(pubkeyBase64Url)) {
+			_logger.LogWarning($"Invalid pubkey provided: \'{pubkeyBase64Url}\'.");
+			return StatusCode(StatusCodes.Status400BadRequest, ErrorMessages.WireguardPublicKeyFormatInvalid);
+		}
+
+		var actualKey = pubkeyBase64Url
+			.Replace('-', '+')
+			.Replace('_', '/');
+
+		return await this.DeletePeer(new(actualKey));
+	}
 }
 

@@ -58,7 +58,7 @@ public sealed class IpDedicationService
 	private const byte FirstIpByteStart = 10;
 	private const byte SecondIpByteStart = 6;
 
-	private const int MaxClients = 100 * 255 * 255; // can be safely increased up to (128-6)*255*255
+	private const int MaxClients = 248 * 255 * 255; // can be safely increased up to (255-6)*255*255
 	private const int NetworkMask = 32;
 
 	private Dictionary<string, int> _dedicatedAddresses;

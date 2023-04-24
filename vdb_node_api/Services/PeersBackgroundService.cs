@@ -124,7 +124,12 @@ public sealed class PeersBackgroundService : BackgroundService
 			 */
 			int delayS = _settings.PeersRenewIntervalSeconds - (int)(DateTime.UtcNow - _lastUpdateUtc).TotalSeconds;
 			_logger.LogInformation($"ExecuteAsync is delayed for {delayS} seconds.");
-			await Task.Delay(delayS * 1000);
+			
+			if(delayS > int.MaxValue / 1010) {
+				delayS = int.MaxValue / 1010;
+			}
+
+			await Task.Delay(TimeSpan.FromSeconds(delayS),stoppingToken);
 		}
 	}
 }
