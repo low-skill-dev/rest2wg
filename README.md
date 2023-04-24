@@ -5,7 +5,7 @@
 [![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/en-us/apps/aspnet)
 # rest2wireguard
 ### Alpine-based TLS-securely WebAPI-managed Wireguard server.
-#### You can freely connect to the demo rest2wireguard container running on VPS in Frankfurt-am-Main with '--cpus=0.1' using [this release](https://github.com/LuminoDiode/rest2wg_demo/releases/tag/v0.0.2-beta).
+#### Useable for both personal and enterprise purposes. You can freely connect to the demo rest2wireguard container running on VPS in Frankfurt-am-Main with '--cpus=0.1' using [this release](https://github.com/LuminoDiode/rest2wg_demo/releases/tag/v0.0.2-beta).
 <br/>
 
 ## Quick start:
@@ -16,9 +16,10 @@ You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS
     
 Now you can access next endpoints:
 - **GET /api/status** - always returns 200_OK (if not 401). May return Authorization header HMAC in body.
-- **GET /api/peers[?withCleanup=false]** - get list of all peers [and remove outdated]
-- **PUT /api/peers** - add new peer
-- **PATCH /api/peers** - remove existing peer
+- **GET /api/peers[?withCleanup=false]** - get list of all peers [and remove outdated].
+- **PUT /api/peers** - add new peer.
+- **PATCH /api/peers** - remove existing peer.
+- **DELETE /api/peers/{PubkeyBase64Url}** - do the same as above but without RFC 9110 violation.
 
 Where for PUT and PATCH endpoints you must provide application/json body in the next format:
 
@@ -98,6 +99,11 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
     - **REST2WG_DISABLE_STATUS_HMAC** - disables returning Authorization header key HmacSha512 on GET /api/status endpoint.
         - Valid range: true/false.
         - Default: false.
+
+## Full list of listened ports
+- **51820** - udp wireguard port.
+- **51821** - tcp nginx-to-api HTTP2 self-signed TLS port.
+- **51822** - tcp nginx-to-api no-TLS port.
 
 ## Using docker secrets
 The ASP-application loads */run/secrets/aspsecrets.json* file, which is default location for docker secrets. So if you want to use it, create file in the next format, where every directive is optional. Be aware, environmental variables are being added to the arrays (e.g. MasterAccounts), otherwise it will override the *aspsecrets* values.
