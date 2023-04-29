@@ -86,8 +86,8 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
     - **REST2WG_HANDSHAKE_AGO_LIMIT** - peer is removed on review if latest handshake occured more than VALUE seconds ago.
         - Valid range: 0<VALUE<2^31
         - Default: 2^31.
-    - **REST2WG_REVIEW_INTERVAL** - interval of peers review and removing outdated.
-        - Valid range: 0<VALUE<2^31
+    - **REST2WG_REVIEW_INTERVAL** - interval of peers review and removing outdated (in seconds).
+        - Valid range: 0<VALUE<2^**21** *(not 31!)*
         - Default: 0.
         - Special value: 0 - review is never performed automatically.
     - **REST2WG_DISABLE_GET_PEERS** - disables GET:api/peers endpoint, returning 503 response.
