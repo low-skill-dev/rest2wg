@@ -41,11 +41,16 @@ public static class WgCommandsExecutor
 	{
 		return $"set wg0 peer \"{pubKey}\" remove";
 	}
+	private static string GetSaveConfigCommand()
+	{
+		return $"wg-quick save wg0";
+	}
 	private static string GetWgShowCommand(string wgInterfaceName = null!)
 	{
 		return wgInterfaceName is null ?
 			"show" : $"show {wgInterfaceName}";
 	}
+
 
 	public static async Task<string> AddPeer(string pubKey, string allowedIps)
 	{
@@ -55,6 +60,11 @@ public static class WgCommandsExecutor
 	{
 		return await RunCommand(GetRemovePeerCommand(pubKey));
 	}
+	public static async Task<string> SaveConfig()
+	{
+		return await RunCommand(GetSaveConfigCommand());
+	}
+
 
 	public static async Task<IEnumerator<WgShortPeerInfo>> GetPeersListEnumerator()
 	{

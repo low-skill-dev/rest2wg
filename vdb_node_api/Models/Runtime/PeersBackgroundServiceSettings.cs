@@ -4,6 +4,7 @@ public class PeersBackgroundServiceSettings
 {
 	public int PeersRenewIntervalSeconds { get; set; } = 0;
 	public int HandshakeAgoLimitSeconds { get; set; } = 0;
+	public bool SaveConfigOnEveryChange { get; set; } = false;
 
 	public PeersBackgroundServiceSettings(int peersRenewIntervalSeconds, int handshakeAgoLimitSeconds)
 	{

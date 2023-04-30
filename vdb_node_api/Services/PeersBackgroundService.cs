@@ -41,7 +41,12 @@ public sealed class PeersBackgroundService : BackgroundService
 		string ip = _ipService.EnsureDedicatedAddressForPeer(pubkey);
 		string result = await WgCommandsExecutor.AddPeer(pubkey, ip);
 
-		return !string.IsNullOrWhiteSpace(result) ? throw new AggregateException(result) : ip;
+		if(string.IsNullOrWhiteSpace(result)) {
+			if(_settings.SaveConfigOnEveryChange) await SaveConfig();
+			return ip;
+		} else {
+			throw new AggregateException(result);
+		}
 	}
 	public async Task<bool> EnsurePeerRemoved(string pubkey)
 	{
@@ -49,7 +54,14 @@ public sealed class PeersBackgroundService : BackgroundService
 		/* DeletePeer вернет true, если пир был найден и удален.
 		 * Вывод в консоль от WG отсутствует по-умолчанию.
 		 */
+		if(_ipService.DeletePeer(pubkey) || string.IsNullOrWhiteSpace(output)) {
+			if(_settings.SaveConfigOnEveryChange) await SaveConfig();
+		}
 		return _ipService.DeletePeer(pubkey) && string.IsNullOrWhiteSpace(output);
+	}
+	public async Task SaveConfig()
+	{
+		await WgCommandsExecutor.SaveConfig();
 	}
 
 	private Stopwatch sw = new();
