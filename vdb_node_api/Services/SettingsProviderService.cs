@@ -48,6 +48,8 @@ public class SettingsProviderService
 				fromConf.PeersRenewIntervalSeconds = _environment.REVIEW_INTERVAL.Value;
 			if (_environment.HANDSHAKE_AGO_LIMIT is not null)
 				fromConf.HandshakeAgoLimitSeconds = _environment.HANDSHAKE_AGO_LIMIT.Value;
+			if(_environment.SAVE_CONFIG_ON_CHANGE is not null)
+				fromConf.SaveConfigOnEveryChange = _environment.SAVE_CONFIG_ON_CHANGE.Value;
 
 			return fromConf;
 		}
