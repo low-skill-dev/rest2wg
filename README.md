@@ -90,6 +90,9 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
         - Valid range: 0<VALUE<2^**21** *(not 31!)*
         - Default: 0.
         - Special value: 0 - review is never performed automatically.
+    - **REST2WG_SAVE_CONFIG_ON_CHANGE** - will the server save wireguard config to file on every peers change.
+        - Valid range: true/false.
+        - Default: true.
     - **REST2WG_DISABLE_GET_PEERS** - disables GET:api/peers endpoint, returning 503 response.
         - Valid range: true/false.
         - Default: false.
