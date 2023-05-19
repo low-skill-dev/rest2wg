@@ -83,6 +83,9 @@ Be aware, the data is not encrypted here, just encoded. If you are using auth yo
     - **REST2WG_AUTH_KEYHASH_BASE64** - add specified key hash to the collection provided by aspsecrets.json.
         - Valid range: any base64-encoded string.
         - Default: null.
+    - **REST2WG_IGNORE_UNAUTHORIZED** - server will not send any data back on an unauthorized request. It will be invisible.
+        - Valid range: true/false.
+        - Default: false.
     - **REST2WG_HANDSHAKE_AGO_LIMIT** - peer is removed on review if latest handshake occured more than VALUE seconds ago.
         - Valid range: 0<VALUE<2^31
         - Default: 2^31.
