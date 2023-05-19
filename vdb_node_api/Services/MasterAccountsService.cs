@@ -7,6 +7,7 @@ namespace vdb_node_api.Services;
 public sealed class MasterAccountsService
 {
 	private readonly byte[][] _mastersKeyHashes;
+
 	public MasterAccountsService(SettingsProviderService settingsProvider)
 	{
 		_mastersKeyHashes = settingsProvider.MasterAccounts

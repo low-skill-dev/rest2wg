@@ -5,10 +5,12 @@ namespace vdb_node_api.Infrastructure;
 public sealed class ApiAuthorizationMiddleware : IMiddleware
 {
 	private readonly MasterAccountsService _accountsService;
+	private readonly bool _ignoreUnauthorized;
 	private readonly ILogger _logger;
-	public ApiAuthorizationMiddleware(MasterAccountsService accountsService, ILogger<ApiAuthorizationMiddleware> logger)
+	public ApiAuthorizationMiddleware(MasterAccountsService accountsService, EnvironmentProvider environment, ILogger<ApiAuthorizationMiddleware> logger)
 	{
 		_accountsService = accountsService;
+		_ignoreUnauthorized = environment.IGNORE_UNAUTHORIZED ?? false;
 		_logger = logger;
 	}
 
@@ -22,50 +24,55 @@ public sealed class ApiAuthorizationMiddleware : IMiddleware
 	{
 		var header = context.Request.Headers.Authorization;
 		string? key;
-		try
-		{
+		try {
 			/* according to RFC, the header may have single value only
 			 * Authorization  = "Authorization" ":" credentials
 			 * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
 			 */
 			key = header.Single();
-		}
-		catch (InvalidOperationException) // key is not single
-		{
+		} catch(InvalidOperationException) // key is not single
+		  {
 			_logger.LogWarning(
 				GetRejectionMessage(context, $"Authorization header appeared {header.Count} times, expected 1."));
 
-			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+			context.Response.StatusCode = _ignoreUnauthorized
+				? StatusCodes.Status403Forbidden
+				: StatusCodes.Status400BadRequest;
 			return Task.CompletedTask;
 		}
 
-		if (string.IsNullOrEmpty(key)) // key is not present
+		if(string.IsNullOrEmpty(key)) // key is not present
 		{
 			_logger.LogWarning(
 				GetRejectionMessage(context, "Authorization key was null or empty."));
 
-			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+			context.Response.StatusCode = _ignoreUnauthorized
+				? StatusCodes.Status403Forbidden
+				: StatusCodes.Status400BadRequest;
 			return Task.CompletedTask;
 		}
 
-		try
-		{
+		try {
 			key = key.Split(' ').Last();
-			if (!_accountsService.IsValid(key)) // key format is valid, but not found
+			if(!_accountsService.IsValid(key)) // key format is valid, but not found
 			{
 				_logger.LogWarning(
 					GetRejectionMessage(context, "Authorization key was not found on the server."));
 
-				context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+				context.Response.StatusCode = _ignoreUnauthorized
+				? StatusCodes.Status403Forbidden
+				: StatusCodes.Status401Unauthorized;
 				return Task.CompletedTask;
 			}
-		}
-		catch // key format is invalid
-		{
+		} catch // key format is invalid
+		  {
 			_logger.LogWarning(
 					GetRejectionMessage(context, "Authorization key format was not valid."));
 
-			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+			context.Response.StatusCode = _ignoreUnauthorized
+				? StatusCodes.Status403Forbidden
+				: StatusCodes.Status400BadRequest;
 			return Task.CompletedTask;
 		}
 
