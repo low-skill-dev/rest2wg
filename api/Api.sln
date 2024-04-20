@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "api\Api.csproj", "{BA0DA15E-4E57-4ED0-A4BE-E8135AA2DFC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{B24A14DA-D10D-4C98-A5A3-7B00A33A86F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WgManipulator", "WgManipulator\WgManipulator.csproj", "{B11EFCB5-8561-40B2-BA66-B18903A3CB07}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA0DA15E-4E57-4ED0-A4BE-E8135AA2DFC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA0DA15E-4E57-4ED0-A4BE-E8135AA2DFC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA0DA15E-4E57-4ED0-A4BE-E8135AA2DFC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA0DA15E-4E57-4ED0-A4BE-E8135AA2DFC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B24A14DA-D10D-4C98-A5A3-7B00A33A86F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B24A14DA-D10D-4C98-A5A3-7B00A33A86F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B24A14DA-D10D-4C98-A5A3-7B00A33A86F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B24A14DA-D10D-4C98-A5A3-7B00A33A86F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B11EFCB5-8561-40B2-BA66-B18903A3CB07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B11EFCB5-8561-40B2-BA66-B18903A3CB07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B11EFCB5-8561-40B2-BA66-B18903A3CB07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B11EFCB5-8561-40B2-BA66-B18903A3CB07}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
