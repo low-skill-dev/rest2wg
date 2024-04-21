@@ -4,19 +4,22 @@
 [![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org)
 [![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/en-us/apps/aspnet)
 # rest2wireguard
-### Alpine-based TLS-securely WebAPI-managed Wireguard server.
-#### Useable for both personal and enterprise purposes. <!--You can freely connect to the demo rest2wireguard container running on VPS in Frankfurt-am-Main with '--cpus=0.2' using [this release](https://github.com/LuminoDiode/rest2wg_demo/releases/tag/v0.0.2-beta) or generate plain WG-config using [wireguard-exchange](https://wireguard-exchange.bruhcontent.ru/).-->
+### Alpine-based TLS-securely WebAPI-managed Wireguard server. 
+#### Focusing on simplicity and security. Useable for both personal and enterprise purposes. <!--You can freely connect to the demo rest2wireguard container running on VPS in Frankfurt-am-Main with '--cpus=0.2' using [this release](https://github.com/LuminoDiode/rest2wg_demo/releases/tag/v0.0.2-beta) or generate plain WG-config using [wireguard-exchange](https://wireguard-exchange.bruhcontent.ru/).-->
 <br/>
 
 ## Quick start:
     docker run --cap-add NET_ADMIN -p 51850:51820/udp -p 51851:51821/tcp --env REST2WG_ALLOW_NOAUTH=true luminodiode/rest2wireguard
-You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS encryption without authorization request header required. You can also expose 51822 port if you want to make requests without TLS encryption. Dont forget to allow ports in your UFW if there is one:
+You will get the image listening 51850 by Wireguard and 51851 by WebAPI with TLS, expose 51822 if you want to make requests without TLS.
+## Endpoints:
 
-    ufw allow 51850/udp && ufw allow 51851/tcp
-    
+### GET /api/peers *- list of all peers.*
+
+
+
 Now you can access next endpoints:
-- **GET /api/status** - always returns 200_OK (if not 401). May return Authorization header HMAC in body.
-- **GET /api/peers[?withCleanup=false]** - get list of all peers [and remove outdated].
+- **GET /api/status** - always returns 200_OK.
+- **GET /api/peers** - get list of all peers [and remove outdated].
 - **PUT /api/peers** - add new peer.
 - **PATCH /api/peers** - remove existing peer.
 - **DELETE /api/peers/{PubkeyBase64Url}** - do the same as above but without RFC 9110 violation.
