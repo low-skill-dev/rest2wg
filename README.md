@@ -4,7 +4,7 @@
 [![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org)
 [![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/en-us/apps/aspnet)
 # rest2wireguard
-## Attention! Breaking changes is coming with the 'v2' branch. Consider using it from now on.
+## Attention! Breaking changes is coming with the 'v2' branch.
 ### Alpine-based TLS-securely WebAPI-managed Wireguard server.
 #### Useable for both personal and enterprise purposes. <!--You can freely connect to the demo rest2wireguard container running on VPS in Frankfurt-am-Main with '--cpus=0.2' using [this release](https://github.com/LuminoDiode/rest2wg_demo/releases/tag/v0.0.2-beta) or generate plain WG-config using [wireguard-exchange](https://wireguard-exchange.bruhcontent.ru/).-->
 <br/>
